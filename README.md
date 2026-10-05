@@ -6,7 +6,7 @@ A farmer uploads a photo of a leaf, a deep-learning model identifies the disease
 
 ---
 
-## ✨ Features
+## Features
 
 - **Disease detection from a photo** — 9 crops supported, one DenseNet model per crop (apple, cherry, corn, grape, peach, pepper, potato, strawberry, tomato), with confidence score and top-3 predictions
 - **Diagnosis and treatment** — description, pathogen, severity, infection indicators, and step-by-step treatment advice
@@ -19,7 +19,7 @@ A farmer uploads a photo of a leaf, a deep-learning model identifies the disease
 
 ---
 
-## 🧱 Tech stack
+##  Tech stack
 
 | Part | Technology |
 | --- | --- |
@@ -55,7 +55,7 @@ The SQLite database (`phytosentinel.db`) and the `uploads/` folder contain user 
 
 ---
 
-## 🚀 Getting started
+## Getting started
 
 ### Requirements
 
