@@ -1,0 +1,94 @@
+@startuml PhytoSentinel_UseCase
+
+title PhytoSentinel — Diagramme de Cas d'Utilisation
+
+top to bottom direction
+
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #E8F5E9
+  BorderColor #388E3C
+  ArrowColor #1B5E20
+  ActorBackgroundColor #FFF9C4
+  ActorBorderColor #F57F17
+}
+skinparam actor {
+  BackgroundColor #FFF9C4
+  BorderColor #F57F17
+}
+skinparam padding 10
+skinparam nodesep 40
+skinparam ranksep 50
+
+' ─────────────────────────────────────────
+' ACTEURS
+' ─────────────────────────────────────────
+actor "Agriculteur"    as Farmer
+actor "Administrateur" as Admin
+
+' ─────────────────────────────────────────
+' SYSTÈME
+' ─────────────────────────────────────────
+rectangle "PhytoSentinel" {
+
+  package "Authentification" {
+    usecase "Se connecter"  as UC01
+    usecase "S'inscrire"    as UC02
+  }
+
+  package "Analyses IA" {
+    usecase "Téléverser une image"                            as UC10
+    usecase "Détecter une maladie (IA)"                      as UC11
+    usecase "Voir historique des analyses"                    as UC12
+    usecase "Envoyer résultat à l'admin"                     as UC13
+    usecase "Voir toutes les analyses"                        as UC14
+    usecase "Consulter catalogue\nmaladies & recommandations" as UC15
+  }
+
+  package "Alertes" {
+    usecase "Recevoir des alertes" as UC20
+  }
+
+  package "Calendrier" {
+    usecase "Utiliser le calendrier\nintelligent" as UC30
+  }
+
+  package "Gestion Utilisateurs" {
+    usecase "Voir tous les utilisateurs" as UC40
+    usecase "Supprimer un utilisateur"   as UC41
+    usecase "Attribuer un rôle"          as UC42
+  }
+
+}
+
+' ─────────────────────────────────────────
+' ASSOCIATIONS — Agriculteur (à gauche)
+' ─────────────────────────────────────────
+Farmer -down-> UC01
+Farmer -down-> UC02
+Farmer -down-> UC10
+Farmer -down-> UC11
+Farmer -down-> UC12
+Farmer -down-> UC13
+Farmer -down-> UC15
+Farmer -down-> UC20
+Farmer -down-> UC30
+
+' ─────────────────────────────────────────
+' ASSOCIATIONS — Administrateur (à droite)
+' ─────────────────────────────────────────
+Admin -down-> UC01
+Admin -down-> UC11
+Admin -down-> UC14
+Admin -down-> UC20
+Admin -down-> UC40
+Admin -down-> UC41
+Admin -down-> UC42
+
+' ─────────────────────────────────────────
+' RELATIONS <<include>>
+' ─────────────────────────────────────────
+UC13 .down.> UC11 : <<include>>
+UC12 .down.> UC11 : <<include>>
+
+@enduml

@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Carte Sanitaire - PhytoSentinel Guelma</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <style>
+      .map-container {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 24px;
+      }
+      .map-card {
+        background: rgba(12, 31, 20, 0.5);
+        border: 1px solid rgba(74, 222, 128, 0.1);
+        border-radius: 20px;
+        overflow: hidden;
+      }
+      .map-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid rgba(74, 222, 128, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .map-body {
+        position: relative;
+        background: linear-gradient(135deg, var(--bg-0), var(--bg-1));
+        min-height: 500px;
+      }
+      .map-filters {
+        display: flex;
+        gap: 8px;
+      }
+      .map-svg {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+      }
+      .commune-dot {
+        position: absolute;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: transform 0.3s;
+      }
+      .commune-dot::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        animation: ripple 2s ease-out infinite;
+      }
+      .commune-dot.red {
+        background: var(--red);
+      }
+      .commune-dot.red::after {
+        background: rgba(248, 113, 113, 0.38);
+      }
+      .commune-dot.amber {
+        background: var(--amber);
+      }
+      .commune-dot.amber::after {
+        background: rgba(251, 191, 36, 0.38);
+      }
+      .commune-dot.green {
+        background: var(--green);
+      }
+      .commune-dot.green::after {
+        background: rgba(74, 222, 128, 0.38);
+      }
+      .commune-dot:hover {
+        transform: scale(1.6);
+      }
+      .commune-tooltip {
+        position: absolute;
+        bottom: calc(100% + 10px);
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(6, 18, 10, 0.96);
+        border: 1px solid rgba(74, 222, 128, 0.28);
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 12px;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+        z-index: 20;
+      }
+      .commune-dot:hover .commune-tooltip {
+        opacity: 1;
+      }
+      .map-legend {
+        position: absolute;
+        bottom: 16px;
+        left: 16px;
+        background: rgba(3, 11, 5, 0.88);
+        border: 1px solid rgba(74, 222, 128, 0.18);
+        border-radius: 12px;
+        padding: 14px 16px;
+      }
+      .map-live {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(3, 11, 5, 0.82);
+        border: 1px solid rgba(74, 222, 128, 0.2);
+        border-radius: 50px;
+        padding: 6px 14px;
+      }
+      .sidebar-card {
+        background: rgba(12, 31, 20, 0.5);
+        border: 1px solid rgba(74, 222, 128, 0.1);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+      }
+      .commune-rank-item {
+        padding: 12px;
+        background: rgba(12, 31, 20, 0.4);
+        border-radius: 12px;
+        margin-bottom: 10px;
+      }
+      .commune-rank-item:last-child {
+        margin-bottom: 0;
+      }
+      .commune-rank-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .commune-rank-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--t1);
+      }
+      .commune-rank-count {
+        font-size: 14px;
+        font-weight: 800;
+      }
+      .total-cases {
+        text-align: center;
+        padding: 20px;
+        background: linear-gradient(
+          135deg,
+          rgba(74, 222, 128, 0.08),
+          rgba(34, 197, 94, 0.05)
+        );
+        border: 1px solid rgba(74, 222, 128, 0.2);
+        border-radius: 16px;
+      }
+      @media (max-width: 900px) {
+        .map-container {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body class="grid-bg">
+    <div class="app-container">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M12 3C9 3 5 7 5 12c0 3 1.4 5.5 3.5 7"
+                  stroke="#f0fdf4"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M12 3c3 0 7 4 7 9c0 3-1.4 5.5-3.5 7"
+                  stroke="#a3e635"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M12 22V11M8.5 15l3.5-4 3.5 4"
+                  stroke="#f0fdf4"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            <div class="sidebar-logo-text">
+              <div class="sidebar-logo-title">Phyto<span>Sentinel</span></div>
+              <div class="sidebar-logo-subtitle">DSA · Guelma · Inspection</div>
+            </div>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="system-status">
+            <div class="system-status-dot blink"></div>
+            <span class="system-status-text">Système actif</span>
+          </div>
+          <div class="nav-section">
+            <div class="nav-section-title">Principal</div>
+            <a href="index.html" class="nav-item"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <rect x="3" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="14" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" /></svg></span
+              ><span class="nav-item-text">Accueil</span></a
+            ><a href="detection.html" class="nav-item"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 16v-4M12 8h.01" /></svg></span
+              ><span class="nav-item-text">Détection IA</span></a
+            ><a href="maladies.html" class="nav-item"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" /></svg></span
+              ><span class="nav-item-text">Gestion Maladies</span></a
+            >
+          </div>
+          <div class="nav-section">
+            <div class="nav-section-title">Surveillance</div>
+            <a href="carte.html" class="nav-item active"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                  <circle cx="12" cy="10" r="3" /></svg></span
+              ><span class="nav-item-text">Carte Sanitaire</span></a
+            ><a href="alertes.html" class="nav-item"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 01-3.46 0" /></svg></span
+              ><span class="nav-item-text">Alertes</span
+              ><span class="nav-item-badge">3</span></a
+            ><a href="rapports.html" class="nav-item"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+                  />
+                  <polyline points="14 2 14 8 20 8" /></svg></span
+              ><span class="nav-item-text">Rapports</span></a
+            >
+          </div>
+          <div class="nav-section">
+            <div class="nav-section-title">Administration</div>
+            <a href="database.html" class="nav-item"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <ellipse cx="12" cy="5" rx="9" ry="3" />
+                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></svg></span
+              ><span class="nav-item-text">Base de Données</span></a
+            ><a href="modele.html" class="nav-item"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                  /></svg></span
+              ><span class="nav-item-text">Modèle IA</span></a
+            ><a href="parametres.html" class="nav-item"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="3" /></svg></span
+              ><span class="nav-item-text">Paramètres</span></a
+            >
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <button class="sidebar-toggle" onclick="Sidebar.toggle()">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="11 17 6 12 11 7" />
+              <polyline points="18 17 13 12 18 7" />
+            </svg>
+          </button>
+        </div>
+      </aside>
+      <main class="main-content">
+        <header class="header">
+          <div class="header-left">
+            <div class="header-breadcrumb">
+              <a href="index.html">PhytoSentinel</a><span>/</span
+              ><span>Carte Sanitaire</span>
+            </div>
+          </div>
+          <div class="header-actions">
+            <div class="header-user">
+              <div class="header-user-avatar">MA</div>
+              <div class="header-user-info">
+                <div class="header-user-name">M. Amara</div>
+                <div class="header-user-role">Inspecteur DSA</div>
+              </div>
+            </div>
+          </div>
+        </header>
+        <div class="page-content">
+          <div class="page-header" style="margin-bottom: 24px">
+            <h1 class="page-title">Carte Sanitaire de la Wilaya de Guelma</h1>
+            <p class="page-subtitle">
+              Visualisation géographique en temps réel de la pression
+              phytosanitaire par commune
+            </p>
+          </div>
+          <div class="map-container">
+            <div class="map-card">
+              <div class="map-header">
+                <h3 style="font-size: 15px; font-weight: 700; color: var(--t1)">
+                  🗺️ Wilaya de Guelma —
+                  <span id="mapCommuneCount">—</span> communes actives
+                </h3>
+                <div class="map-filters">
+                  <button
+                    class="badge b-r"
+                    style="cursor: pointer"
+                    onclick="filterDots('red')"
+                  >
+                    Critique
+                  </button>
+                  <button
+                    class="badge b-a"
+                    style="cursor: pointer"
+                    onclick="filterDots('amber')"
+                  >
+                    Modéré
+                  </button>
+                  <button
+                    class="badge b-g"
+                    style="cursor: pointer"
+                    onclick="filterDots('green')"
+                  >
+                    Faible
+                  </button>
+                  <button
+                    class="badge"
+                    style="
+                      cursor: pointer;
+                      background: rgba(255, 255, 255, 0.05);
+                      color: var(--t3);
+                      border: 1px solid rgba(255, 255, 255, 0.1);
+                    "
+                    onclick="filterDots('all')"
+                  >
+                    Tous
+                  </button>
+                </div>
+              </div>
+              <div class="map-body" id="mapBody">
+                <svg class="map-svg" viewBox="0 0 620 500">
+                  <defs>
+                    <pattern
+                      id="grid"
+                      x="0"
+                      y="0"
+                      width="36"
+                      height="36"
+                      patternUnits="userSpaceOnUse"
+                    >
+                      <path
+                        d="M 36 0 L 0 0 0 36"
+                        fill="none"
+                        stroke="rgba(74, 222, 128, 0.15)"
+                        stroke-width="0.5"
+                      />
+                    </pattern>
+                  </defs>
+                  <rect width="620" height="500" fill="url(#grid)" />
+                  <path
+                    d="M 120 80 L 200 60 L 320 65 L 430 80 L 510 110 L 520 160 L 490 210 L 500 260 L 460 310 L 390 360 L 300 380 L 200 370 L 140 320 L 100 260 L 90 190 L 120 80Z"
+                    fill="rgba(12, 31, 20, 0.55)"
+                    stroke="rgba(74, 222, 128, 0.22)"
+                    stroke-width="1.6"
+                  />
+                  <line
+                    x1="200"
+                    y1="60"
+                    x2="200"
+                    y2="370"
+                    stroke="rgba(74, 222, 128, 0.08)"
+                    stroke-width="0.8"
+                    stroke-dasharray="5 4"
+                  />
+                  <line
+                    x1="120"
+                    y1="200"
+                    x2="510"
+                    y2="200"
+                    stroke="rgba(74, 222, 128, 0.08)"
+                    stroke-width="0.8"
+                    stroke-dasharray="5 4"
+                  />
+                  <line
+                    x1="310"
+                    y1="65"
+                    x2="310"
+                    y2="380"
+                    stroke="rgba(74, 222, 128, 0.08)"
+                    stroke-width="0.8"
+                    stroke-dasharray="5 4"
+                  />
+                  <text
+                    x="310"
+                    y="240"
+                    text-anchor="middle"
+                    fill="rgba(74, 222, 128, 0.18)"
+                    font-size="28"
+                    font-family="Syne"
+                    font-weight="800"
+                  >
+                    GUELMA
+                  </text>
+                  <path
+                    d="M 130 250 Q 200 230 280 245 Q 360 260 440 240 Q 490 228 520 220"
+                    fill="none"
+                    stroke="rgba(45, 212, 191, 0.25)"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  />
+                  <text
+                    x="300"
+                    y="238"
+                    fill="rgba(45, 212, 191, 0.3)"
+                    font-size="9"
+                    font-family="DM Sans"
+                  >
+                    Oued Seybouse
+                  </text>
+                </svg>
+                <!-- Les points de communes sont injectés dynamiquement ici -->
+                <div
+                  id="mapDotsContainer"
+                  style="
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                  "
+                ></div>
+                <div class="map-legend">
+                  <div
+                    style="
+                      font-size: 11px;
+                      font-weight: 700;
+                      color: var(--tm);
+                      margin-bottom: 10px;
+                      letter-spacing: 0.5px;
+                    "
+                  >
+                    NIVEAU DE PRESSION
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 8px">
+                    <div style="display: flex; align-items: center; gap: 8px">
+                      <div
+                        style="
+                          width: 10px;
+                          height: 10px;
+                          background: var(--red);
+                          border-radius: 50%;
+                          box-shadow: 0 0 6px rgba(248, 113, 113, 0.6);
+                        "
+                      ></div>
+                      <span style="font-size: 12px; color: var(--t3)"
+                        >Critique (&gt;50 cas)</span
+                      >
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px">
+                      <div
+                        style="
+                          width: 10px;
+                          height: 10px;
+                          background: var(--amber);
+                          border-radius: 50%;
+                          box-shadow: 0 0 6px rgba(251, 191, 36, 0.6);
+                        "
+                      ></div>
+                      <span style="font-size: 12px; color: var(--t3)"
+                        >Modéré (20–50 cas)</span
+                      >
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px">
+                      <div
+                        style="
+                          width: 10px;
+                          height: 10px;
+                          background: var(--green);
+                          border-radius: 50%;
+                          box-shadow: 0 0 6px rgba(74, 222, 128, 0.6);
+                        "
+                      ></div>
+                      <span style="font-size: 12px; color: var(--t3)"
+                        >Faible (&lt;20 cas)</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div class="map-live">
+                  <div
+                    class="blink"
+                    style="
+                      width: 7px;
+                      height: 7px;
+                      background: var(--green);
+                      border-radius: 50%;
+                    "
+                  ></div>
+                  <span
+                    style="
+                      font-size: 11px;
+                      color: var(--green);
+                      font-weight: 700;
+                    "
+                    >EN DIRECT</span
+                  >
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="sidebar-card">
+                <h4
+                  style="
+                    font-size: 14px;
+                    font-weight: 700;
+                    color: var(--t1);
+                    margin-bottom: 14px;
+                  "
+                >
+                  Communes les plus touchées
+                </h4>
+                <div id="communeRankList">
+                  <div
+                    style="
+                      text-align: center;
+                      padding: 20px;
+                      color: var(--tm);
+                      font-size: 13px;
+                    "
+                  >
+                    Chargement…
+                  </div>
+                </div>
+              </div>
+              <div class="total-cases">
+                <div
+                  style="
+                    font-size: 12px;
+                    color: var(--tm);
+                    margin-bottom: 6px;
+                    letter-spacing: 0.5px;
+                  "
+                >
+                  CAS ENREGISTRÉS
+                </div>
+                <div
+                  id="totalCasesValue"
+                  style="font-size: 44px; font-weight: 800; color: var(--green)"
+                >
+                  —
+                </div>
+                <div
+                  id="weeklyVariation"
+                  style="font-size: 11px; color: var(--tm); margin-top: 4px"
+                >
+                  Chargement des données…
+                </div>
+                <span class="badge b-r" style="margin-top: 10px"
+                  >Wilaya de Guelma</span
+                >
+              </div>
+
+              <!-- Panneau des dernières détections avec images -->
+              <div class="sidebar-card" style="margin-top: 16px">
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 14px;
+                  "
+                >
+                  <h4
+                    style="font-size: 14px; font-weight: 700; color: var(--t1)"
+                  >
+                    📷 Dernières détections
+                  </h4>
+                  <button
+                    class="btn btn-sm btn-o"
+                    onclick="loadRecentAnalyses()"
+                  >
+                    ↻
+                  </button>
+                </div>
+                <div id="recentAnalysesList">
+                  <div
+                    style="
+                      text-align: center;
+                      padding: 20px;
+                      color: var(--tm);
+                      font-size: 13px;
+                    "
+                  >
+                    Chargement…
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script src="../js/utils.js"></script>
+    <style>
+      /* Recent analyses panel */
+      .analysis-card {
+        display: flex;
+        gap: 10px;
+        padding: 10px;
+        background: rgba(12, 31, 20, 0.4);
+        border-radius: 12px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: background 0.2s;
+        border: 1px solid rgba(74, 222, 128, 0.07);
+      }
+      .analysis-card:hover {
+        background: rgba(12, 31, 20, 0.65);
+      }
+      .analysis-card-img {
+        width: 52px;
+        height: 52px;
+        border-radius: 8px;
+        object-fit: cover;
+        flex-shrink: 0;
+        background: rgba(74, 222, 128, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        overflow: hidden;
+      }
+      .analysis-card-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+      .analysis-card-body {
+        flex: 1;
+        min-width: 0;
+      }
+      .analysis-card-title {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: var(--t1);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 2px;
+      }
+      .analysis-card-sub {
+        font-size: 11px;
+        color: var(--tm);
+        margin-bottom: 4px;
+      }
+      .analysis-card-meta {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      /* Detail modal */
+      .detail-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.6);
+        align-items: center;
+        justify-content: center;
+      }
+      .detail-modal.open {
+        display: flex;
+      }
+      .detail-modal-box {
+        background: var(--bg-1, #0c1f14);
+        border: 1px solid rgba(74, 222, 128, 0.18);
+        border-radius: 20px;
+        padding: 28px;
+        max-width: 480px;
+        width: 92%;
+        max-height: 85vh;
+        overflow-y: auto;
+        position: relative;
+      }
+      .detail-modal-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: none;
+        border: none;
+        color: var(--t3);
+        cursor: pointer;
+        font-size: 20px;
+        line-height: 1;
+      }
+      .detail-modal-img {
+        width: 100%;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-bottom: 16px;
+      }
+    </style>
+    <!-- Detail modal -->
+    <div class="detail-modal" id="analysisDetailModal">
+      <div class="detail-modal-box">
+        <button class="detail-modal-close" onclick="closeDetail()">✕</button>
+        <div id="detailContent"></div>
+      </div>
+    </div>
+    <script src="../js/auth.js"></script>
+    <script>
+      const API_BASE = "http://localhost:5000";
+
+      // ─── Filter dots ────────────────────────────────────────────
+      function filterDots(type) {
+        document.querySelectorAll(".commune-dot").forEach((d) => {
+          const match = type === "all" || d.dataset.color === type;
+          d.style.opacity = match ? "1" : "0.15";
+          d.style.transform = match ? "" : "scale(0.7)";
+        });
+      }
+
+      // ─── Plant emojis ────────────────────────────────────────────
+      const PLANT_EMOJI = {
+        tomato: "🍅",
+        apple: "🍎",
+        grape: "🍇",
+        corn: "🌽",
+        potato: "🥔",
+        pepper: "🫑",
+        strawberry: "🍓",
+        cherry: "🍒",
+        peach: "🍑",
+      };
+      const SEV_BADGE = {
+        critical: "b-r",
+        moderate: "b-a",
+        low: "b-g",
+        faible: "b-g",
+      };
+      const SEV_LABEL = {
+        critical: "Critique",
+        moderate: "Modéré",
+        low: "Faible",
+        faible: "Faible",
+      };
+      const SEV_COLOR = {
+        critical: "var(--red)",
+        moderate: "var(--amber)",
+        low: "var(--green)",
+        faible: "var(--green)",
+      };
+
+      function formatDate(d) {
+        if (!d) return "";
+        const dt = new Date(d);
+        return dt.toLocaleDateString("fr-FR", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        });
+      }
+
+      // ─── Render map dots from API data ──────────────────────────
+      function renderMapDots(dots) {
+        const container = document.getElementById("mapDotsContainer");
+        container.innerHTML = "";
+        document.getElementById("mapCommuneCount").textContent = dots.length;
+
+        dots.forEach((dot) => {
+          const el = document.createElement("div");
+          el.className = `commune-dot ${dot.color}`;
+          el.dataset.color = dot.color;
+          el.style.cssText = `width:${dot.size}px;height:${dot.size}px;top:${dot.top}%;left:${dot.left}%;`;
+          const dotColor =
+            SEV_COLOR[
+              dot.color === "red"
+                ? "critical"
+                : dot.color === "amber"
+                  ? "moderate"
+                  : "low"
+            ];
+          el.innerHTML = `
+          <div class="commune-tooltip">
+            <strong>${dot.commune}</strong><br>
+            <span style="color:${dotColor};">${dot.main_disease} — ${dot.total_cases} cas</span>
+          </div>`;
+          // Click to filter analyses by commune
+          el.onclick = () => {
+            filterDots("all");
+            loadRecentAnalyses(dot.commune);
+          };
+          container.appendChild(el);
+        });
+      }
+
+      // ─── Render commune ranking sidebar ──────────────────────────
+      function renderCommuneRank(communes, communeDiseases) {
+        const list = document.getElementById("communeRankList");
+        if (!communes.length) {
+          list.innerHTML =
+            '<div style="color:var(--tm);font-size:13px;padding:8px 0;">Aucune donnée disponible.</div>';
+          return;
+        }
+        const maxCases = communes[0].total_cases;
+        list.innerHTML = communes
+          .slice(0, 7)
+          .map((c) => {
+            const pct = Math.round((c.total_cases / maxCases) * 100);
+            const color =
+              c.total_cases > 50
+                ? "red"
+                : c.total_cases > 20
+                  ? "amber"
+                  : "green";
+            const badgeCls =
+              color === "red" ? "b-r" : color === "amber" ? "b-a" : "b-g";
+            const barColor =
+              color === "red"
+                ? "linear-gradient(90deg,var(--red),#ef4444)"
+                : color === "amber"
+                  ? "linear-gradient(90deg,var(--amber),#f59e0b)"
+                  : "linear-gradient(90deg,var(--green),#22c55e)";
+            const mainDisease = communeDiseases[c.commune] || "—";
+            return `
+          <div class="commune-rank-item" onclick="loadRecentAnalyses('${c.commune}')" style="cursor:pointer;">
+            <div class="commune-rank-header">
+              <span class="commune-rank-name">${c.commune}</span>
+              <span class="commune-rank-count badge ${badgeCls}">${c.total_cases}</span>
+            </div>
+            <div class="bar"><div class="fill" style="width:${pct}%;background:${barColor};"></div></div>
+            <div style="font-size:10px;color:var(--tm);margin-top:4px;">${mainDisease}</div>
+          </div>`;
+          })
+          .join("");
+      }
+
+      // ─── Render recent analyses with images ──────────────────────
+      function renderRecentAnalyses(analyses, filterCommune) {
+        const list = document.getElementById("recentAnalysesList");
+        if (!analyses.length) {
+          list.innerHTML = `<div style="color:var(--tm);font-size:13px;padding:8px 0;">
+          ${filterCommune ? `Aucune analyse pour « ${filterCommune} »` : "Aucune analyse enregistrée."}</div>`;
+          return;
+        }
+
+        list.innerHTML = analyses
+          .map((a) => {
+            const emoji = PLANT_EMOJI[a.plant_type] || "🌿";
+            const sev = (a.severity || "moderate").toLowerCase();
+            const badgeCls = SEV_BADGE[sev] || "b-a";
+            const badgeTxt = SEV_LABEL[sev] || a.severity;
+            const pct = Math.round((a.confidence || 0) * 100);
+            const commune = a.commune || "—";
+            const imgHtml = a.image_url
+              ? `<img src="${API_BASE}${a.image_url}" alt="plant" onerror="this.parentElement.textContent='${emoji}'">`
+              : emoji;
+
+            return `
+          <div class="analysis-card" onclick="showDetail(${a.id})">
+            <div class="analysis-card-img">${imgHtml}</div>
+            <div class="analysis-card-body">
+              <div class="analysis-card-title">${a.disease_name || "Maladie inconnue"}</div>
+              <div class="analysis-card-sub">📍 ${commune} · ${formatDate(a.analysis_date)}</div>
+              <div class="analysis-card-meta">
+                <span class="badge ${badgeCls}" style="font-size:10px;">${badgeTxt}</span>
+                <span style="font-size:10px;color:var(--tm);">${pct}% confiance</span>
+              </div>
+            </div>
+          </div>`;
+          })
+          .join("");
+      }
+
+      // ─── Show detail modal ───────────────────────────────────────
+      async function showDetail(id) {
+        const modal = document.getElementById("analysisDetailModal");
+        const content = document.getElementById("detailContent");
+        content.innerHTML =
+          '<div style="text-align:center;padding:30px;color:var(--tm);">Chargement…</div>';
+        modal.classList.add("open");
+
+        try {
+          const resp = await fetch(`${API_BASE}/api/analyses/${id}`);
+          if (!resp.ok) throw new Error("Not found");
+          const a = await resp.json();
+          const emoji = PLANT_EMOJI[a.plant_type] || "🌿";
+          const sev = (a.severity || "moderate").toLowerCase();
+          const badgeCls = SEV_BADGE[sev] || "b-a";
+          const pct = Math.round((a.confidence || 0) * 100);
+
+          const imgSection = a.image_stored_name
+            ? `<img class="detail-modal-img" src="${API_BASE}/uploads/${a.image_stored_name}"
+               onerror="this.style.display='none'" alt="plant image">`
+            : `<div style="font-size:52px;text-align:center;margin-bottom:16px;">${emoji}</div>`;
+
+          const treatmentHtml =
+            Array.isArray(a.treatment_steps) && a.treatment_steps.length
+              ? `<div style="margin-top:16px;">
+              <div style="font-size:12px;font-weight:700;color:var(--tm);margin-bottom:8px;">💊 TRAITEMENT</div>
+              ${a.treatment_steps
+                .map(
+                  (
+                    s,
+                    i,
+                  ) => `<div style="display:flex;gap:8px;margin-bottom:6px;">
+                <span style="background:rgba(74,222,128,0.15);color:var(--green);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">${i + 1}</span>
+                <span style="font-size:12px;color:var(--t3);">${s}</span></div>`,
+                )
+                .join("")}
+             </div>`
+              : "";
+
+          content.innerHTML = `
+          ${imgSection}
+          <div style="font-size:18px;font-weight:800;color:var(--t1);margin-bottom:4px;">${a.disease_name || "—"}</div>
+          ${a.scientific_name ? `<div style="font-size:12px;color:var(--tm);font-style:italic;margin-bottom:12px;">${a.scientific_name}</div>` : ""}
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+            <span class="badge ${badgeCls}">${SEV_LABEL[sev] || sev}</span>
+            <span class="badge" style="background:rgba(255,255,255,0.05);color:var(--t3);">${emoji} ${a.plant_type || "—"}</span>
+            <span class="badge" style="background:rgba(255,255,255,0.05);color:var(--t3);">Confiance: ${pct}%</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+            <div style="background:rgba(12,31,20,0.4);border-radius:10px;padding:10px;">
+              <div style="font-size:10px;color:var(--tm);margin-bottom:2px;">COMMUNE</div>
+              <div style="font-size:13px;font-weight:600;color:var(--t1);">${a.commune || "—"}</div>
+            </div>
+            <div style="background:rgba(12,31,20,0.4);border-radius:10px;padding:10px;">
+              <div style="font-size:10px;color:var(--tm);margin-bottom:2px;">PÉRIMÈTRE</div>
+              <div style="font-size:13px;font-weight:600;color:var(--t1);">${a.perimetre || "—"}</div>
+            </div>
+            <div style="background:rgba(12,31,20,0.4);border-radius:10px;padding:10px;">
+              <div style="font-size:10px;color:var(--tm);margin-bottom:2px;">DATE</div>
+              <div style="font-size:13px;font-weight:600;color:var(--t1);">${formatDate(a.analysis_date)}</div>
+            </div>
+            <div style="background:rgba(12,31,20,0.4);border-radius:10px;padding:10px;">
+              <div style="font-size:10px;color:var(--tm);margin-bottom:2px;">INFECTION</div>
+              <div style="font-size:13px;font-weight:600;color:var(--t1);">${a.infection_rate || 0}%</div>
+            </div>
+          </div>
+          ${a.diagnosis_description ? `<div style="font-size:12px;color:var(--t3);line-height:1.65;margin-bottom:10px;">${a.diagnosis_description}</div>` : ""}
+          ${treatmentHtml}`;
+        } catch (e) {
+          content.innerHTML =
+            '<div style="color:var(--red);padding:20px;text-align:center;">Impossible de charger les détails.</div>';
+        }
+      }
+
+      function closeDetail() {
+        document.getElementById("analysisDetailModal").classList.remove("open");
+      }
+
+      // Close modal on overlay click
+      document
+        .getElementById("analysisDetailModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) closeDetail();
+        });
+
+      // ─── Load recent analyses (optionally filtered by commune) ───
+      async function loadRecentAnalyses(commune) {
+        const list = document.getElementById("recentAnalysesList");
+        list.innerHTML =
+          '<div style="text-align:center;padding:20px;color:var(--tm);font-size:13px;">Chargement…</div>';
+        try {
+          let url = `${API_BASE}/api/carte/analyses?limit=15`;
+          if (commune) url += `&commune=${encodeURIComponent(commune)}`;
+          const resp = await fetch(url);
+          const data = await resp.json();
+          renderRecentAnalyses(data.analyses || [], commune);
+        } catch (e) {
+          list.innerHTML =
+            '<div style="color:var(--tm);font-size:13px;padding:8px;">Serveur non disponible.</div>';
+        }
+      }
+
+      // ─── Main data loader ────────────────────────────────────────
+      async function loadMapData() {
+        try {
+          const resp = await fetch(`${API_BASE}/api/carte/map-data`);
+          if (!resp.ok) throw new Error("Server error");
+          const data = await resp.json();
+
+          // Map dots
+          renderMapDots(data.map_dots || []);
+
+          // Commune ranking
+          renderCommuneRank(
+            data.top_communes || [],
+            data.commune_diseases || {},
+          );
+
+          // Total cases
+          document.getElementById("totalCasesValue").textContent =
+            data.total_cases ?? "—";
+
+          // Weekly variation
+          const variation = data.weekly_variation ?? 0;
+          const sign = variation >= 0 ? "↑" : "↓";
+          const varColor =
+            variation > 0
+              ? "var(--red)"
+              : variation < 0
+                ? "var(--green)"
+                : "var(--tm)";
+          document.getElementById("weeklyVariation").innerHTML =
+            `<span style="color:${varColor};font-weight:700;">${sign} ${Math.abs(variation)}%</span> par rapport à la semaine dernière`;
+        } catch (e) {
+          // Fallback message when server is offline
+          document.getElementById("mapCommuneCount").textContent = "—";
+          document.getElementById("totalCasesValue").textContent = "—";
+          document.getElementById("weeklyVariation").textContent =
+            "Serveur non disponible";
+          document.getElementById("communeRankList").innerHTML =
+            '<div style="color:var(--tm);font-size:13px;padding:8px 0;">Démarrez le serveur Flask pour charger les données.</div>';
+        }
+      }
+
+      // ─── Init ────────────────────────────────────────────────────
+      loadMapData();
+      loadRecentAnalyses();
+
+      // Auto-refresh toutes les 30 secondes
+      setInterval(() => {
+        loadMapData();
+      }, 30000);
+    </script>
+  </body>
+</html>

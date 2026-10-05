@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modèle IA - PhytoSentinel Guelma</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    .model-overview { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+    .model-card { background: rgba(12, 31, 20, 0.5); border: 1px solid rgba(74, 222, 128, 0.1); border-radius: 20px; padding: 24px; }
+    .model-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .model-icon { width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, var(--lime), var(--green-mid)); display: flex; align-items: center; justify-content: center; }
+    .model-title { font-size: 18px; font-weight: 700; color: var(--t1); }
+    .model-version { font-size: 12px; color: var(--green); }
+    .model-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    .model-stat { text-align: center; padding: 14px; background: rgba(12, 31, 20, 0.6); border-radius: 12px; }
+    .model-stat-value { font-size: 20px; font-weight: 800; color: var(--green); }
+    .model-stat-label { font-size: 10px; color: var(--tm); margin-top: 4px; }
+    .chart-container { height: 200px; display: flex; align-items: flex-end; gap: 8px; padding: 20px 0; }
+    .chart-bar { flex: 1; background: linear-gradient(180deg, var(--lime), var(--green-mid)); border-radius: 6px 6px 0 0; min-height: 10px; transition: height 1s ease; }
+    .training-controls { background: rgba(12, 31, 20, 0.5); border: 1px solid rgba(74, 222, 128, 0.1); border-radius: 20px; padding: 24px; }
+    .control-group { margin-bottom: 20px; }
+    .control-label { font-size: 13px; font-weight: 600; color: var(--t1); margin-bottom: 8px; }
+    .slider-container { display: flex; align-items: center; gap: 14px; }
+    .slider { flex: 1; -webkit-appearance: none; height: 6px; background: rgba(74, 222, 128, 0.15); border-radius: 10px; outline: none; }
+    .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: var(--green); border-radius: 50%; cursor: pointer; }
+    .slider-value { font-size: 14px; font-weight: 700; color: var(--green); min-width: 40px; text-align: right; }
+    .progress-section { margin-top: 20px; }
+    .progress-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+    .progress-label { font-size: 13px; color: var(--t3); }
+    .progress-value { font-size: 13px; font-weight: 600; color: var(--green); }
+    .dataset-info { background: rgba(12, 31, 20, 0.5); border: 1px solid rgba(74, 222, 128, 0.1); border-radius: 20px; padding: 24px; }
+    .dataset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .dataset-item { background: rgba(12, 31, 20, 0.6); border-radius: 12px; padding: 16px; text-align: center; }
+    .dataset-item-icon { font-size: 24px; margin-bottom: 8px; }
+    .dataset-item-value { font-size: 18px; font-weight: 700; color: var(--t1); }
+    .dataset-item-label { font-size: 11px; color: var(--tm); }
+    @media (max-width: 900px) { .model-overview { grid-template-columns: 1fr; } .model-stats { grid-template-columns: repeat(2, 1fr); } .dataset-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="grid-bg">
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="sidebar-header"><div class="sidebar-logo"><div class="sidebar-logo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3C9 3 5 7 5 12c0 3 1.4 5.5 3.5 7" stroke="#f0fdf4" stroke-width="1.8" stroke-linecap="round"/><path d="M12 3c3 0 7 4 7 9c0 3-1.4 5.5-3.5 7" stroke="#a3e635" stroke-width="1.8" stroke-linecap="round"/><path d="M12 22V11M8.5 15l3.5-4 3.5 4" stroke="#f0fdf4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="sidebar-logo-text"><div class="sidebar-logo-title">Phyto<span>Sentinel</span></div><div class="sidebar-logo-subtitle">DSA · Guelma · Inspection</div></div></div></div>
+      <nav class="sidebar-nav">
+        <div class="system-status"><div class="system-status-dot blink"></div><span class="system-status-text">Système actif</span></div>
+        <div class="nav-section"><div class="nav-section-title">Principal</div><a href="index.html" class="nav-item"><span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/></svg></span><span class="nav-item-text">Accueil</span></a><a href="detection.html" class="nav-item"><span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></span><span class="nav-item-text">Détection IA</span></a><a href="maladies.html" class="nav-item"><span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/></svg></span><span class="nav-item-text">Gestion Maladies</span></a></div>
+        <div class="nav-section"><div class="nav-section-title">Surveillance</div><a href="carte.html" class="nav-item"><span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></span><span class="nav-item-text">Carte Sanitaire</span></a><a href="alertes.html" class="nav-item"><span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/></svg></span><span class="nav-item-text">Alertes</span><span class="nav-item-badge">3</span></a><a href="rapports.html" class="nav-item"><span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></span><span class="nav-item-text">Rapports</span></a></div>
+        <div class="nav-section"><div class="nav-section-title">Administration</div><a href="database.html" class="nav-item"><span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/></svg></span><span class="nav-item-text">Base de Données</span></a><a href="modele.html" class="nav-item active"><span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg></span><span class="nav-item-text">Modèle IA</span></a><a href="parametres.html" class="nav-item"><span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></span><span class="nav-item-text">Paramètres</span></a></div>
+      </nav>
+      <div class="sidebar-footer"><button class="sidebar-toggle" onclick="Sidebar.toggle()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg></button></div>
+    </aside>
+    <main class="main-content">
+      <header class="header"><div class="header-left"><div class="header-breadcrumb"><a href="index.html">PhytoSentinel</a><span>/</span><span>Modèle IA</span></div></div><div class="header-actions"><div class="header-user"><div class="header-user-avatar">MA</div><div class="header-user-info"><div class="header-user-name">M. Amara</div><div class="header-user-role">Inspecteur DSA</div></div></div></div></header>
+      <div class="page-content">
+        <div class="page-header" style="margin-bottom: 24px;"><h1 class="page-title">Modèle de Détection IA</h1><p class="page-subtitle">Entraînement, évaluation et gestion du modèle PhytoNet</p></div>
+        <div class="model-overview">
+          <div class="model-card">
+            <div class="model-header"><div class="model-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><div><div class="model-title">PhytoNet v3.2</div><div class="model-version">✓ Modèle actif et prêt</div></div></div>
+            <div class="model-stats"><div class="model-stat"><div class="model-stat-value">97.4%</div><div class="model-stat-label">Précision</div></div><div class="model-stat"><div class="model-stat-value">0.08</div><div class="model-stat-label">Loss</div></div><div class="model-stat"><div class="model-stat-value">50</div><div class="model-stat-label">Epochs</div></div><div class="model-stat"><div class="model-stat-value">0.3s</div><div class="model-stat-label">Inférence</div></div></div>
+            <div style="display: flex; gap: 10px;"><button class="btn btn-sm btn-o"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exporter</button><button class="btn btn-sm btn-o"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>Réinitialiser</button></div>
+          </div>
+          <div class="model-card">
+            <h4 style="font-size: 14px; font-weight: 700; color: var(--t1); margin-bottom: 16px;">📈 Historique d'entraînement</h4>
+            <div class="chart-container" id="accuracyChart"><div class="chart-bar" style="height: 65%;"></div><div class="chart-bar" style="height: 72%;"></div><div class="chart-bar" style="height: 78%;"></div><div class="chart-bar" style="height: 83%;"></div><div class="chart-bar" style="height: 87%;"></div><div class="chart-bar" style="height: 90%;"></div><div class="chart-bar" style="height: 92%;"></div><div class="chart-bar" style="height: 94%;"></div><div class="chart-bar" style="height: 95%;"></div><div class="chart-bar" style="height: 97.4%;"></div></div>
+            <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 11px; color: var(--tm);"><span>Epoch 1</span><span>Epoch 10</span></div>
+          </div>
+        </div>
+        <div class="training-controls">
+          <h3 style="font-size: 16px; font-weight: 700; color: var(--t1); margin-bottom: 20px;">⚙️ Paramètres d'entraînement</h3>
+          <div class="control-group"><div class="control-label">Epochs</div><div class="slider-container"><input type="range" class="slider" min="10" max="100" value="50" id="epochsSlider"><span class="slider-value" id="epochsValue">50</span></div></div>
+          <div class="control-group"><div class="control-label">Learning Rate</div><div class="slider-container"><input type="range" class="slider" min="1" max="50" value="10" id="lrSlider"><span class="slider-value" id="lrValue">0.001</span></div></div>
+          <div class="control-group"><div class="control-label">Batch Size</div><div class="slider-container"><input type="range" class="slider" min="8" max="64" value="32" id="batchSlider"><span class="slider-value" id="batchValue">32</span></div></div>
+          <div class="progress-section" id="trainingProgress" style="display: none;"><div class="progress-header"><span class="progress-label">Progression de l'entraînement...</span><span class="progress-value" id="progressPercent">0%</span></div><div class="bar" style="height: 8px;"><div class="fill" id="progressFill" style="width: 0%; background: linear-gradient(90deg, var(--lime), var(--green));"></div></div></div>
+          <div style="display: flex; gap: 12px; margin-top: 20px;"><button class="btn" id="trainBtn" onclick="startTraining()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>Démarrer l'entraînement</button><button class="btn btn-o" onclick="stopTraining()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12"/></svg>Arrêter</button></div>
+        </div>
+        <div class="dataset-info" style="margin-top: 24px;">
+          <h3 style="font-size: 16px; font-weight: 700; color: var(--t1); margin-bottom: 20px;">📊 Dataset — PlantVillage (Kaggle)</h3>
+          <div class="dataset-grid"><div class="dataset-item"><div class="dataset-item-icon">🖼️</div><div class="dataset-item-value">54,306</div><div class="dataset-item-label">Images totales</div></div><div class="dataset-item"><div class="dataset-item-icon">🦠</div><div class="dataset-item-value">38</div><div class="dataset-item-label">Classes de maladies</div></div><div class="dataset-item"><div class="dataset-item-icon">📁</div><div class="dataset-item-value">38</div><div class="dataset-item-label">Catégories</div></div><div class="dataset-item"><div class="dataset-item-icon">✅</div><div class="dataset-item-value">48,876</div><div class="dataset-item-label">Images entraînement</div></div><div class="dataset-item"><div class="dataset-item-icon">🧪</div><div class="dataset-item-value">5,430</div><div class="dataset-item-label">Images validation</div></div></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="../js/utils.js"></script>
+  <script>
+    document.getElementById('epochsSlider').addEventListener('input', function(e) { document.getElementById('epochsValue').textContent = e.target.value; });
+    document.getElementById('lrSlider').addEventListener('input', function(e) { document.getElementById('lrValue').textContent = (e.target.value / 10000).toFixed(4); });
+    document.getElementById('batchSlider').addEventListener('input', function(e) { document.getElementById('batchValue').textContent = e.target.value; });
+    function startTraining() {
+      document.getElementById('trainingProgress').style.display = 'block';
+      document.getElementById('trainBtn').disabled = true;
+      PhytoSentinel.Notifications.info('Entraînement started... Connect to backend for real training.');
+      let progress = 0;
+      const interval = setInterval(function() {
+        progress += 2;
+        document.getElementById('progressPercent').textContent = progress + '%';
+        document.getElementById('progressFill').style.width = progress + '%';
+        if (progress >= 100) {
+          clearInterval(interval);
+          document.getElementById('trainBtn').disabled = false;
+          PhytoSentinel.Notifications.success('Entraînement terminé!');
+        }
+      }, 500);
+    }
+    function stopTraining() { PhytoSentinel.Notifications.warning('Entraînement arrêté'); }
+  </script>
+</body>
+</html>

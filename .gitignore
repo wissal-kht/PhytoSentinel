@@ -1,0 +1,14 @@
+@"
+phyto/
+venv/
+__pycache__/
+*.pyc
+.env
+*.db
+uploads/
+*.h5
+BigData_Exam*
+N-TOM-*.jpg
+deepseek_html_*.html
+frontend/python
+"@ | Set-Content -Encoding ascii .gitignore

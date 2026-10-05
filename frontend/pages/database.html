@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Base de Données - PhytoSentinel Guelma</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <style>
+      .db-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .db-section {
+        background: rgba(12, 31, 20, 0.5);
+        border: 1px solid rgba(74, 222, 128, 0.1);
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 20px;
+      }
+      .db-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .db-section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--t1);
+      }
+      .data-row {
+        display: flex;
+        align-items: center;
+        padding: 14px;
+        background: rgba(12, 31, 20, 0.4);
+        border-radius: 12px;
+        margin-bottom: 10px;
+        transition: all 0.2s;
+      }
+      .data-row:hover {
+        background: rgba(12, 31, 20, 0.6);
+      }
+      .data-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin-right: 14px;
+        background: rgba(74, 222, 128, 0.1);
+      }
+      .data-info {
+        flex: 1;
+      }
+      .data-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--t1);
+        margin-bottom: 2px;
+      }
+      .data-subtitle {
+        font-size: 12px;
+        color: var(--tm);
+      }
+      .data-meta {
+        display: flex;
+        gap: 20px;
+        margin-left: 20px;
+      }
+      .data-meta-item {
+        text-align: center;
+      }
+      .data-meta-value {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--t1);
+      }
+      .data-meta-label {
+        font-size: 10px;
+        color: var(--tm);
+      }
+      .data-actions {
+        display: flex;
+        gap: 8px;
+      }
+      @media (max-width: 900px) {
+        .db-stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body class="grid-bg">
+    <div class="app-container">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M12 3C9 3 5 7 5 12c0 3 1.4 5.5 3.5 7"
+                  stroke="#f0fdf4"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M12 3c3 0 7 4 7 9c0 3-1.4 5.5-3.5 7"
+                  stroke="#a3e635"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M12 22V11M8.5 15l3.5-4 3.5 4"
+                  stroke="#f0fdf4"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            <div class="sidebar-logo-text">
+              <div class="sidebar-logo-title">Phyto<span>Sentinel</span></div>
+              <div class="sidebar-logo-subtitle">DSA · Guelma · Inspection</div>
+            </div>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <div class="system-status">
+            <div class="system-status-dot blink"></div>
+            <span class="system-status-text">Système actif</span>
+          </div>
+          <div class="nav-section">
+            <div class="nav-section-title">Principal</div>
+            <a href="index.html" class="nav-item"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <rect x="3" y="3" width="7" height="7" rx="1" /></svg></span
+              ><span class="nav-item-text">Accueil</span></a
+            ><a href="detection.html" class="nav-item"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="10" /></svg></span
+              ><span class="nav-item-text">Détection IA</span></a
+            ><a href="maladies.html" class="nav-item"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /></svg></span
+              ><span class="nav-item-text">Gestion Maladies</span></a
+            >
+          </div>
+          <div class="nav-section">
+            <div class="nav-section-title">Surveillance</div>
+            <a href="carte.html" class="nav-item"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                  <circle cx="12" cy="10" r="3" /></svg></span
+              ><span class="nav-item-text">Carte Sanitaire</span></a
+            ><a href="alertes.html" class="nav-item"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"
+                  /></svg></span
+              ><span class="nav-item-text">Alertes</span
+              ><span class="nav-item-badge">3</span></a
+            ><a href="rapports.html" class="nav-item"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+                  /></svg></span
+              ><span class="nav-item-text">Rapports</span></a
+            >
+          </div>
+          <div class="nav-section">
+            <div class="nav-section-title">Administration</div>
+            <a href="database.html" class="nav-item active"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <ellipse cx="12" cy="5" rx="9" ry="3" /></svg></span
+              ><span class="nav-item-text">Base de Données</span></a
+            ><a href="modele.html" class="nav-item"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M12 2L2 7l10 5 10-5-10-5z" /></svg></span
+              ><span class="nav-item-text">Modèle IA</span></a
+            ><a href="parametres.html" class="nav-item"
+              ><span class="nav-item-icon"
+                ><svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="3" /></svg></span
+              ><span class="nav-item-text">Paramètres</span></a
+            >
+          </div>
+        </nav>
+        <div class="sidebar-footer">
+          <button class="sidebar-toggle" onclick="Sidebar.toggle()">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="11 17 6 12 11 7" />
+              <polyline points="18 17 13 12 18 7" />
+            </svg>
+          </button>
+        </div>
+      </aside>
+      <main class="main-content">
+        <header class="header">
+          <div class="header-left">
+            <div class="header-breadcrumb">
+              <a href="index.html">PhytoSentinel</a><span>/</span
+              ><span>Base de Données</span>
+            </div>
+          </div>
+          <div class="header-actions">
+            <div class="header-user">
+              <div class="header-user-avatar">MA</div>
+              <div class="header-user-info">
+                <div class="header-user-name">M. Amara</div>
+                <div class="header-user-role">Inspecteur DSA</div>
+              </div>
+            </div>
+          </div>
+        </header>
+        <div class="page-content">
+          <div
+            class="page-header"
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              margin-bottom: 24px;
+            "
+          >
+            <div>
+              <h1 class="page-title">Base de Données</h1>
+              <p class="page-subtitle">
+                Gestion complète des données phytosanitaires de la wilaya de
+                Guelma
+              </p>
+            </div>
+            <button class="btn" onclick="Modal.show('importModal')">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" /></svg
+              >Importer
+            </button>
+          </div>
+          <div class="db-stats">
+            <div class="stat-card" style="text-align: center">
+              <div class="stat-icon">📷</div>
+              <div class="stat-value" data-count="2847">0</div>
+              <div class="stat-label">Images analysées</div>
+            </div>
+            <div class="stat-card" style="text-align: center">
+              <div class="stat-icon">🦠</div>
+              <div class="stat-value green" data-count="18">0</div>
+              <div class="stat-label">Maladies référencées</div>
+            </div>
+            <div class="stat-card" style="text-align: center">
+              <div class="stat-icon">📍</div>
+              <div class="stat-value amber" data-count="38">0</div>
+              <div class="stat-label">Communes</div>
+            </div>
+            <div class="stat-card" style="text-align: center">
+              <div class="stat-icon">👤</div>
+              <div class="stat-value teal" data-count="12">0</div>
+              <div class="stat-label">Inspecteurs</div>
+            </div>
+          </div>
+          <div class="db-section">
+            <div class="db-section-header">
+              <h3 class="db-section-title">📊 Diagnostics</h3>
+              <button class="btn btn-sm btn-o">Exporter</button>
+            </div>
+            <div class="data-row">
+              <div class="data-icon">🍅</div>
+              <div class="data-info">
+                <div class="data-title">
+                  Mildiou de la Tomate — Guelma-Centre
+                </div>
+                <div class="data-subtitle">
+                  Phytophthora infestans · 22 Mars 2026
+                </div>
+              </div>
+              <div class="data-meta">
+                <div class="data-meta-item">
+                  <div class="data-meta-value">82%</div>
+                  <div class="data-meta-label">Confiance</div>
+                </div>
+                <div class="data-meta-item">
+                  <div class="data-meta-value">Critique</div>
+                  <div class="data-meta-label">Sévérité</div>
+                </div>
+              </div>
+              <div class="data-actions">
+                <button class="btn btn-sm btn-icon btn-o" title="Voir">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg></button
+                ><button class="btn btn-sm btn-icon btn-o" title="Modifier">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"
+                    />
+                    <path
+                      d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="data-row">
+              <div class="data-icon">🌾</div>
+              <div class="data-info">
+                <div class="data-title">Rouille Brune du Blé — Oued Zenati</div>
+                <div class="data-subtitle">
+                  Puccinia triticina · 21 Mars 2026
+                </div>
+              </div>
+              <div class="data-meta">
+                <div class="data-meta-item">
+                  <div class="data-meta-value">76%</div>
+                  <div class="data-meta-label">Confiance</div>
+                </div>
+                <div class="data-meta-item">
+                  <div class="data-meta-value">Modéré</div>
+                  <div class="data-meta-label">Sévérité</div>
+                </div>
+              </div>
+              <div class="data-actions">
+                <button class="btn btn-sm btn-icon btn-o" title="Voir">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg></button
+                ><button class="btn btn-sm btn-icon btn-o" title="Modifier">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"
+                    />
+                    <path
+                      d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="data-row">
+              <div class="data-icon">🍇</div>
+              <div class="data-info">
+                <div class="data-title">
+                  Oïdium de la Vigne — Bouati Mahmoud
+                </div>
+                <div class="data-subtitle">Erysiphe necator · 20 Mars 2026</div>
+              </div>
+              <div class="data-meta">
+                <div class="data-meta-item">
+                  <div class="data-meta-value">89%</div>
+                  <div class="data-meta-label">Confiance</div>
+                </div>
+                <div class="data-meta-item">
+                  <div class="data-meta-value">Faible</div>
+                  <div class="data-meta-label">Sévérité</div>
+                </div>
+              </div>
+              <div class="data-actions">
+                <button class="btn btn-sm btn-icon btn-o" title="Voir">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg></button
+                ><button class="btn btn-sm btn-icon btn-o" title="Modifier">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"
+                    />
+                    <path
+                      d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="db-section">
+            <div class="db-section-header">
+              <h3 class="db-section-title">🗂️ communes</h3>
+              <button class="btn btn-sm btn-o">Exporter</button>
+            </div>
+            <div class="data-row">
+              <div
+                class="data-icon"
+                style="background: rgba(248, 113, 113, 0.15)"
+              >
+                🏛️
+              </div>
+              <div class="data-info">
+                <div class="data-title">Guelma-Centre</div>
+                <div class="data-subtitle">
+                  Capitale de la wilaya · Population: 25,000
+                </div>
+              </div>
+              <div class="data-meta">
+                <div class="data-meta-item">
+                  <div class="data-meta-value">94</div>
+                  <div class="data-meta-label">Cas</div>
+                </div>
+                <div class="data-meta-item">
+                  <div class="data-meta-value">8</div>
+                  <div class="data-meta-label">Maladies</div>
+                </div>
+              </div>
+              <div class="data-actions">
+                <button class="btn btn-sm btn-icon btn-o">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="data-row">
+              <div
+                class="data-icon"
+                style="background: rgba(251, 191, 36, 0.15)"
+              >
+                🏛️
+              </div>
+              <div class="data-info">
+                <div class="data-title">Belkheir</div>
+                <div class="data-subtitle">Commune · Population: 18,500</div>
+              </div>
+              <div class="data-meta">
+                <div class="data-meta-item">
+                  <div class="data-meta-value">58</div>
+                  <div class="data-meta-label">Cas</div>
+                </div>
+                <div class="data-meta-item">
+                  <div class="data-meta-value">6</div>
+                  <div class="data-meta-label">Maladies</div>
+                </div>
+              </div>
+              <div class="data-actions">
+                <button class="btn btn-sm btn-icon btn-o">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <div class="modal-overlay" id="importModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title">Importer des Données</h3>
+          <button class="modal-close" onclick="Modal.hide('importModal')">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <div class="drop-zone" style="margin-bottom: 16px">
+          <div class="upload-placeholder">
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            <div style="font-size: 16px; font-weight: 600; margin: 16px 0 8px">
+              Glissez les fichiers ici
+            </div>
+            <div style="font-size: 13px; color: var(--t3)">
+              CSV, JSON, XLSX · Max 50MB
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">TYPE DE DONNÉES</label
+          ><select class="form-select">
+            <option>Diagnostics</option>
+            <option>Maladies</option>
+            <option>Communes</option>
+            <option>Images</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-o" onclick="Modal.hide('importModal')">
+            Annuler</button
+          ><button class="btn" onclick="importData()">Importer</button>
+        </div>
+      </div>
+    </div>
+    <script src="../js/utils.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+      function importData() {
+        PhytoSentinel.Notifications.success("Importation terminée!");
+        Modal.hide("importModal");
+      }
+    </script>
+  </body>
+</html>

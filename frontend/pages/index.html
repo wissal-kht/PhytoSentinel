@@ -1,0 +1,1083 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accueil - PhytoSentinel Guelma</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <style>
+      /* Dashboard specific styles */
+      .page-header {
+        margin-bottom: 24px;
+      }
+
+      .page-title {
+        font-size: 26px;
+        font-weight: 800;
+        color: var(--t1);
+        margin-bottom: 4px;
+      }
+
+      .page-subtitle {
+        font-size: 14px;
+        color: var(--tm);
+      }
+
+      .welcome-banner {
+        background: linear-gradient(
+          135deg,
+          rgba(34, 197, 94, 0.08),
+          rgba(22, 101, 52, 0.15)
+        );
+        border: 1px solid rgba(74, 222, 128, 0.2);
+        border-radius: 20px;
+        padding: 24px 28px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .welcome-text h2 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--t1);
+        margin-bottom: 4px;
+      }
+
+      .welcome-text p {
+        font-size: 13px;
+        color: var(--t3);
+      }
+
+      .welcome-status {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .dashboard-section {
+        margin-bottom: 24px;
+      }
+
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+
+      .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--t1);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .section-title svg {
+        color: var(--green);
+      }
+
+      .two-col-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+      }
+
+      .recent-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .recent-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px;
+        background: rgba(12, 31, 20, 0.4);
+        border: 1px solid rgba(74, 222, 128, 0.08);
+        border-radius: 14px;
+        transition: all 0.2s;
+      }
+
+      .recent-item:hover {
+        background: rgba(12, 31, 20, 0.6);
+        border-color: rgba(74, 222, 128, 0.15);
+      }
+
+      .recent-item-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+      }
+
+      .recent-item-icon.detection {
+        background: rgba(74, 222, 128, 0.12);
+      }
+
+      .recent-item-icon.alert {
+        background: rgba(248, 113, 113, 0.12);
+      }
+
+      .recent-item-icon.report {
+        background: rgba(45, 212, 191, 0.12);
+      }
+
+      .recent-item-content {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .recent-item-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--t1);
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .recent-item-meta {
+        font-size: 11px;
+        color: var(--tm);
+      }
+
+      .recent-item-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 600;
+      }
+
+      .model-status {
+        background: rgba(12, 31, 20, 0.5);
+        border: 1px solid rgba(74, 222, 128, 0.12);
+        border-radius: 16px;
+        padding: 20px;
+      }
+
+      .model-status-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .model-status-icon {
+        width: 44px;
+        height: 44px;
+        background: linear-gradient(135deg, var(--lime), var(--green-mid));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .model-status-info h4 {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--t1);
+      }
+
+      .model-status-info span {
+        font-size: 11px;
+        color: var(--green);
+      }
+
+      .model-metrics {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .metric-box {
+        background: rgba(12, 31, 20, 0.6);
+        border-radius: 12px;
+        padding: 14px;
+        text-align: center;
+      }
+
+      .metric-value {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--green);
+      }
+
+      .metric-label {
+        font-size: 10px;
+        color: var(--tm);
+        margin-top: 4px;
+      }
+
+      .quick-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .quick-action {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        background: rgba(12, 31, 20, 0.4);
+        border: 1px solid rgba(74, 222, 128, 0.1);
+        border-radius: 12px;
+        color: var(--t3);
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 500;
+        transition: all 0.2s;
+        cursor: pointer;
+      }
+
+      .quick-action:hover {
+        background: rgba(74, 222, 128, 0.08);
+        border-color: rgba(74, 222, 128, 0.25);
+        color: var(--green);
+      }
+
+      .quick-action-icon {
+        font-size: 16px;
+      }
+
+      .weather-widget {
+        background: rgba(12, 31, 20, 0.5);
+        border: 1px solid rgba(74, 222, 128, 0.12);
+        border-radius: 16px;
+        padding: 20px;
+      }
+
+      .weather-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .weather-current {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .weather-temp {
+        font-size: 32px;
+        font-weight: 800;
+        color: var(--amber);
+      }
+
+      .weather-info {
+        font-size: 12px;
+        color: var(--t3);
+      }
+
+      .weather-forecast {
+        display: flex;
+        gap: 8px;
+      }
+
+      .forecast-day {
+        flex: 1;
+        text-align: center;
+        padding: 10px 8px;
+        background: rgba(12, 31, 20, 0.4);
+        border-radius: 10px;
+      }
+
+      .forecast-day-label {
+        font-size: 10px;
+        color: var(--tm);
+        margin-bottom: 4px;
+      }
+
+      .forecast-day-temp {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--t1);
+      }
+
+      @media (max-width: 1200px) {
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .two-col-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+
+  <body class="grid-bg">
+    <div class="app-container">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M12 3C9 3 5 7 5 12c0 3 1.4 5.5 3.5 7"
+                  stroke="#f0fdf4"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M12 3c3 0 7 4 7 9c0 3-1.4 5.5-3.5 7"
+                  stroke="#a3e635"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M12 22V11M8.5 15l3.5-4 3.5 4"
+                  stroke="#f0fdf4"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            <div class="sidebar-logo-text">
+              <div class="sidebar-logo-title">Phyto<span>Sentinel</span></div>
+              <div class="sidebar-logo-subtitle">DSA · Guelma · Inspection</div>
+            </div>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <div class="system-status">
+            <div class="system-status-dot blink"></div>
+            <span class="system-status-text">Système actif</span>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Principal</div>
+            <a href="index.html" class="nav-item active">
+              <span class="nav-item-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <rect x="3" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="14" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" />
+                </svg>
+              </span>
+              <span class="nav-item-text">Accueil</span>
+            </a>
+            <a href="detection.html" class="nav-item">
+              <span class="nav-item-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 16v-4M12 8h.01" />
+                </svg>
+              </span>
+              <span class="nav-item-text">Détection IA</span>
+            </a>
+            <a href="maladies.html" class="nav-item">
+              <span class="nav-item-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+              </span>
+              <span class="nav-item-text">Gestion Maladies</span>
+            </a>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Surveillance</div>
+            <a href="carte.html" class="nav-item">
+              <span class="nav-item-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+              </span>
+              <span class="nav-item-text">Carte Sanitaire</span>
+            </a>
+            <a href="alertes.html" class="nav-item">
+              <span class="nav-item-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 01-3.46 0" />
+                </svg>
+              </span>
+              <span class="nav-item-text">Alertes</span>
+              <span class="nav-item-badge">3</span>
+            </a>
+            <a href="rapports.html" class="nav-item">
+              <span class="nav-item-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+                  />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                </svg>
+              </span>
+              <span class="nav-item-text">Rapports</span>
+            </a>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-section-title">Administration</div>
+            <a href="database.html" class="nav-item">
+              <span class="nav-item-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <ellipse cx="12" cy="5" rx="9" ry="3" />
+                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                </svg>
+              </span>
+              <span class="nav-item-text">Base de Données</span>
+            </a>
+            <a href="modele.html" class="nav-item">
+              <span class="nav-item-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                  />
+                </svg>
+              </span>
+              <span class="nav-item-text">Modèle IA</span>
+            </a>
+            <a href="parametres.html" class="nav-item">
+              <span class="nav-item-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="3" />
+                  <path
+                    d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"
+                  />
+                </svg>
+              </span>
+              <span class="nav-item-text">Paramètres</span>
+            </a>
+          </div>
+        </nav>
+
+        <div class="sidebar-footer">
+          <button class="sidebar-toggle" onclick="Sidebar.toggle()">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="11 17 6 12 11 7" />
+              <polyline points="18 17 13 12 18 7" />
+            </svg>
+          </button>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="main-content">
+        <!-- HEADER -->
+        <header class="header">
+          <div class="header-left">
+            <button
+              class="btn btn-icon mobile-menu-toggle"
+              style="display: none"
+              onclick="Sidebar.toggleMobile()"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+            <div class="header-breadcrumb">
+              <a href="index.html">PhytoSentinel</a>
+              <span>/</span>
+              <span>Accueil</span>
+            </div>
+          </div>
+
+          <div class="header-actions">
+            <div class="header-time" id="currentTime"></div>
+            <div
+              class="header-notifications"
+              onclick="Modal.show('notificationsModal')"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="var(--t3)"
+                stroke-width="2"
+              >
+                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 01-3.46 0" />
+              </svg>
+              <span class="header-notifications-badge">3</span>
+            </div>
+            <div class="header-user">
+              <div class="header-user-avatar">MA</div>
+              <div class="header-user-info">
+                <div class="header-user-name">M. Amara</div>
+                <div class="header-user-role">Inspecteur DSA</div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- PAGE CONTENT -->
+        <div class="page-content">
+          <!-- Page Header -->
+          <div class="page-header">
+            <h1 class="page-title">Surveillance Phytosanitaire</h1>
+            <p class="page-subtitle">
+              Wilaya de Guelma — Direction des Services Agricoles
+            </p>
+          </div>
+
+          <!-- Welcome Banner -->
+          <div class="welcome-banner reveal">
+            <div class="welcome-text">
+              <h2>Bienvenue, M. Amara 👋</h2>
+              <p>
+                Dernière connexion: Aujourd'hui à 08:30 — 3 alertes actives
+                nécessitent votre attention
+              </p>
+            </div>
+            <div class="welcome-status">
+              <div
+                class="blink"
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  background: rgba(74, 222, 128, 0.1);
+                  border: 1px solid rgba(74, 222, 128, 0.2);
+                  border-radius: 50px;
+                  padding: 8px 16px;
+                "
+              >
+                <div
+                  style="
+                    width: 8px;
+                    height: 8px;
+                    background: var(--green);
+                    border-radius: 50%;
+                    box-shadow: 0 0 8px var(--green);
+                  "
+                ></div>
+                <span
+                  style="font-size: 12px; color: var(--green); font-weight: 600"
+                  >Système opérationnel</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="stats-grid">
+            <div class="stat-card reveal" style="transition-delay: 0.1s">
+              <div class="stat-icon">🦠</div>
+              <div class="stat-value red" data-count="358">0</div>
+              <div class="stat-label">Cas enregistrés</div>
+              <div class="stat-change up">↑ 19% cette semaine</div>
+            </div>
+            <div class="stat-card reveal" style="transition-delay: 0.2s">
+              <div class="stat-icon">📍</div>
+              <div class="stat-value amber" data-count="14">0</div>
+              <div class="stat-label">Communes affectées</div>
+              <div class="stat-change up">↑ 3 nouvelles</div>
+            </div>
+            <div class="stat-card reveal" style="transition-delay: 0.3s">
+              <div class="stat-icon">🔔</div>
+              <div class="stat-value green" data-count="47">0</div>
+              <div class="stat-label">Alertes émises</div>
+              <div class="stat-change down">↑ 6 dernières 24h</div>
+            </div>
+            <div class="stat-card reveal" style="transition-delay: 0.4s">
+              <div class="stat-icon">🎯</div>
+              <div class="stat-value lime">
+                97<span style="font-size: 20px">%</span>
+              </div>
+              <div class="stat-label">Précision IA</div>
+              <div class="stat-change down">↑ +0.3% ce mois</div>
+            </div>
+          </div>
+
+          <!-- Two Column Layout -->
+          <div class="two-col-grid">
+            <!-- Left Column -->
+            <div>
+              <!-- Recent Activity -->
+              <div
+                class="dashboard-section reveal"
+                style="transition-delay: 0.5s"
+              >
+                <div class="section-header">
+                  <h3 class="section-title">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    Activité récente
+                  </h3>
+                  <a href="#" class="btn btn-sm btn-o">Voir tout</a>
+                </div>
+                <div class="recent-list">
+                  <div class="recent-item">
+                    <div class="recent-item-icon detection">🔍</div>
+                    <div class="recent-item-content">
+                      <div class="recent-item-title">
+                        Nouveau diagnostic — Guelma-Centre
+                      </div>
+                      <div class="recent-item-meta">
+                        Mildiou grave détecté — Il y a 18 min
+                      </div>
+                    </div>
+                    <span class="recent-item-badge b-r">Critique</span>
+                  </div>
+                  <div class="recent-item">
+                    <div class="recent-item-icon alert">🚨</div>
+                    <div class="recent-item-content">
+                      <div class="recent-item-title">
+                        Alerte transmise — 2 communes
+                      </div>
+                      <div class="recent-item-meta">
+                        Notification Belkheir & Bouchegouf — Il y a 42 min
+                      </div>
+                    </div>
+                    <span class="recent-item-badge b-a">Warning</span>
+                  </div>
+                  <div class="recent-item">
+                    <div class="recent-item-icon report">📊</div>
+                    <div class="recent-item-content">
+                      <div class="recent-item-title">
+                        Rapport hebdomadaire généré
+                      </div>
+                      <div class="recent-item-meta">
+                        Synthèse semaine 12 — Il y a 5h
+                      </div>
+                    </div>
+                    <span class="recent-item-badge b-g">OK</span>
+                  </div>
+                  <div class="recent-item">
+                    <div class="recent-item-icon detection">🤖</div>
+                    <div class="recent-item-content">
+                      <div class="recent-item-title">
+                        Modèle IA mis à jour — v3.2
+                      </div>
+                      <div class="recent-item-meta">
+                        Précision: 96.8% → 97.4% — Il y a 8h
+                      </div>
+                    </div>
+                    <span class="recent-item-badge b-t">Update</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Monthly Cases Chart -->
+              <div
+                class="dashboard-section reveal"
+                style="transition-delay: 0.6s"
+              >
+                <div class="section-header">
+                  <h3 class="section-title">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <line x1="18" y1="20" x2="18" y2="10" />
+                      <line x1="12" y1="20" x2="12" y2="4" />
+                      <line x1="6" y1="20" x2="6" y2="14" />
+                    </svg>
+                    Évolution mensuelle
+                  </h3>
+                </div>
+                <div class="glass" style="padding: 24px">
+                  <div id="monthlyChart" style="height: 180px"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+              <!-- Model Status -->
+              <div
+                class="model-status reveal"
+                style="transition-delay: 0.5s; margin-bottom: 20px"
+              >
+                <div class="model-status-header">
+                  <div class="model-status-icon">
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="white"
+                      stroke-width="2"
+                    >
+                      <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                      <path d="M2 17l10 5 10-5" />
+                      <path d="M2 12l10 5 10-5" />
+                    </svg>
+                  </div>
+                  <div class="model-status-info">
+                    <h4>Modèle PhytoNet v3.2</h4>
+                    <span>✓ Entraîné et actif</span>
+                  </div>
+                </div>
+                <div class="model-metrics">
+                  <div class="metric-box">
+                    <div class="metric-value" id="modelAccuracy">97.4%</div>
+                    <div class="metric-label">Précision</div>
+                  </div>
+                  <div class="metric-box">
+                    <div class="metric-value" id="modelLoss">0.08</div>
+                    <div class="metric-label">Loss</div>
+                  </div>
+                  <div class="metric-box">
+                    <div class="metric-value" id="totalEpochs">50</div>
+                    <div class="metric-label">Epochs</div>
+                  </div>
+                  <div class="metric-box">
+                    <div class="metric-value" id="inferenceTime">0.3s</div>
+                    <div class="metric-label">Inférence</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Actions -->
+              <div
+                class="dashboard-section reveal"
+                style="transition-delay: 0.6s; margin-bottom: 20px"
+              >
+                <div class="section-header">
+                  <h3 class="section-title">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <polygon
+                        points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"
+                      />
+                    </svg>
+                    Actions rapides
+                  </h3>
+                </div>
+                <div class="quick-actions">
+                  <a href="detection.html" class="quick-action">
+                    <span class="quick-action-icon">🔍</span>
+                    Nouvelle analyse
+                  </a>
+                  <a href="alertes.html" class="quick-action">
+                    <span class="quick-action-icon">🚨</span>
+                    Voir alertes
+                  </a>
+                  <a href="rapports.html" class="quick-action">
+                    <span class="quick-action-icon">📊</span>
+                    Générer rapport
+                  </a>
+                  <a href="carte.html" class="quick-action">
+                    <span class="quick-action-icon">🗺️</span>
+                    Carte sanitaire
+                  </a>
+                </div>
+              </div>
+
+              <!-- Weather Widget -->
+              <div class="weather-widget reveal" style="transition-delay: 0.7s">
+                <div class="weather-header">
+                  <h4
+                    style="font-size: 14px; font-weight: 700; color: var(--t1)"
+                  >
+                    🌡️ Conditions — Guelma
+                  </h4>
+                  <span class="badge b-a">Risque élevé</span>
+                </div>
+                <div class="weather-current">
+                  <div class="weather-temp">26°C</div>
+                  <div class="weather-info">
+                    <div>Humidité: 78%</div>
+                    <div>Vent: NE 18 km/h</div>
+                  </div>
+                </div>
+                <div class="weather-forecast" style="margin-top: 16px">
+                  <div class="forecast-day">
+                    <div class="forecast-day-label">Lun</div>
+                    <div class="forecast-day-temp">24°C</div>
+                  </div>
+                  <div class="forecast-day">
+                    <div class="forecast-day-label">Mar</div>
+                    <div class="forecast-day-temp" style="color: var(--red)">
+                      28°C
+                    </div>
+                  </div>
+                  <div class="forecast-day">
+                    <div class="forecast-day-label">Mer</div>
+                    <div class="forecast-day-temp" style="color: var(--red)">
+                      27°C
+                    </div>
+                  </div>
+                  <div class="forecast-day">
+                    <div class="forecast-day-label">Jeu</div>
+                    <div class="forecast-day-temp">25°C</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Notifications Modal -->
+    <div class="modal-overlay" id="notificationsModal">
+      <div class="modal" style="max-width: 400px">
+        <div class="modal-header">
+          <h3 class="modal-title">Notifications</h3>
+          <button
+            class="modal-close"
+            onclick="Modal.hide('notificationsModal')"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <div class="alert-card critical" style="padding: 14px">
+            <div class="alert-side" style="background: var(--red)"></div>
+            <div
+              style="
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--t1);
+                margin-bottom: 4px;
+              "
+            >
+              Mildiou détecté à Guelma-Centre
+            </div>
+            <div style="font-size: 11px; color: var(--tm)">
+              Il y a 18 minutes
+            </div>
+          </div>
+          <div class="alert-card warning" style="padding: 14px">
+            <div class="alert-side" style="background: var(--amber)"></div>
+            <div
+              style="
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--t1);
+                margin-bottom: 4px;
+              "
+            >
+              Risque élevé de rouille — Oued Zenati
+            </div>
+            <div style="font-size: 11px; color: var(--tm)">Il y a 2 heures</div>
+          </div>
+          <div class="alert-card info" style="padding: 14px">
+            <div class="alert-side" style="background: var(--teal)"></div>
+            <div
+              style="
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--t1);
+                margin-bottom: 4px;
+              "
+            >
+              Modèle IA mis à jour
+            </div>
+            <div style="font-size: 11px; color: var(--tm)">Il y a 8 heures</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/utils.js"></script>
+    <script>
+      // Update current time
+      function updateTime() {
+        const now = new Date();
+        const options = {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        };
+        document.getElementById("currentTime").textContent =
+          now.toLocaleDateString("fr-FR", options);
+      }
+      updateTime();
+      setInterval(updateTime, 60000);
+
+      // Monthly chart
+      document.addEventListener("DOMContentLoaded", function () {
+        const chartData = [
+          { label: "Oct", value: 48, color: "rgba(74, 222, 128, 0.4)" },
+          { label: "Nov", value: 36, color: "rgba(74, 222, 128, 0.4)" },
+          { label: "Déc", value: 28, color: "rgba(74, 222, 128, 0.4)" },
+          { label: "Jan", value: 55, color: "rgba(74, 222, 128, 0.4)" },
+          { label: "Fév", value: 66, color: "rgba(74, 222, 128, 0.4)" },
+          {
+            label: "Mar",
+            value: 92,
+            color: "linear-gradient(180deg, var(--lime), var(--green))",
+          },
+        ];
+
+        const container = document.getElementById("monthlyChart");
+        if (container) {
+          const maxValue = Math.max(...chartData.map((d) => d.value));
+          container.innerHTML = `
+          <div style="display: flex; gap: 12px; align-items: flex-end; height: 100%; padding-bottom: 8px;">
+            ${chartData
+              .map((item, i) => {
+                const percent = (item.value / maxValue) * 100;
+                return `
+                <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end;">
+                  <div style="font-size: 12px; font-weight: 700; color: var(--t1);">${item.value}</div>
+                  <div style="width: 100%; background: ${item.color}; border-radius: 6px 6px 0 0; height: ${percent}%; min-height: 20px; transition: height 1s ease ${i * 0.1}s;"></div>
+                  <div style="font-size: 11px; color: var(--t3); ${item.label === "Mar" ? "color: var(--lime); font-weight: 700;" : ""}">${item.label}</div>
+                </div>
+              `;
+              })
+              .join("")}
+          </div>
+        `;
+        }
+
+        // Load dashboard stats from API
+        loadDashboardData();
+      });
+
+      // Load dashboard data from API
+      async function loadDashboardData() {
+        try {
+          const stats = await PhytoSentinel.ApiService.get("/stats");
+          console.log("Dashboard data loaded:", stats);
+          // Update UI with real data when API is available
+        } catch (error) {
+          console.log("Using demo data - API not connected");
+        }
+      }
+    </script>
+  </body>
+</html>

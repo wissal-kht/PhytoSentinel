@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alertes — PhytoSentinel Guelma</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    /* ─── Statistiques ─── */
+    .alerts-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .alert-stat-card { background: rgba(12,31,20,.5); border: 1px solid rgba(74,222,128,.1); border-radius: 16px; padding: 20px; text-align: center; transition: transform .2s; }
+    .alert-stat-card:hover { transform: translateY(-2px); }
+    .alert-stat-card.critical { border-color: rgba(248,113,113,.3); }
+    .alert-stat-card.warning  { border-color: rgba(251,191,36,.3); }
+    .alert-stat-card.info     { border-color: rgba(45,212,191,.3); }
+    .alert-stat-card.success  { border-color: rgba(74,222,128,.3); }
+    .alert-stat-icon  { font-size: 28px; margin-bottom: 8px; }
+    .alert-stat-value { font-size: 32px; font-weight: 800; transition: all .4s; }
+    .alert-stat-value.critical { color: var(--red); }
+    .alert-stat-value.warning  { color: var(--amber); }
+    .alert-stat-value.info     { color: var(--teal); }
+    .alert-stat-value.success  { color: var(--green); }
+    .alert-stat-label { font-size: 12px; color: var(--tm); margin-top: 4px; }
+
+    /* ─── Météo ─── */
+    .weather-conditions { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 24px; }
+    .weather-card { background: rgba(12,31,20,.5); border: 1px solid rgba(74,222,128,.1); border-radius: 16px; padding: 20px; }
+    .weather-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .weather-card-title { font-size: 14px; font-weight: 600; color: var(--t1); }
+    .weather-value { font-size: 30px; font-weight: 800; margin-bottom: 4px; }
+    .weather-desc { font-size: 12px; color: var(--t3); }
+    .weather-updated { font-size: 11px; color: var(--tm); margin-top: 6px; opacity: .7; }
+
+    /* ─── Filtres ─── */
+    .filters-bar { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-btn { padding: 7px 16px; border-radius: 20px; border: 1px solid rgba(74,222,128,.2); background: rgba(12,31,20,.5); color: var(--t2); font-size: 13px; font-weight: 500; cursor: pointer; transition: all .2s; font-family: 'DM Sans', sans-serif; }
+    .filter-btn:hover, .filter-btn.active { background: rgba(74,222,128,.15); border-color: var(--green); color: var(--green); }
+    .filter-btn.f-critical.active  { background: rgba(248,113,113,.15); border-color: var(--red);   color: var(--red); }
+    .filter-btn.f-warning.active   { background: rgba(251,191,36,.15);  border-color: var(--amber); color: var(--amber); }
+    .filter-btn.f-info.active      { background: rgba(45,212,191,.15);  border-color: var(--teal);  color: var(--teal); }
+    .search-box { flex: 1; min-width: 200px; padding: 7px 14px; border-radius: 20px; border: 1px solid rgba(74,222,128,.2); background: rgba(12,31,20,.5); color: var(--t1); font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; }
+    .search-box:focus { border-color: var(--green); }
+    .search-box::placeholder { color: var(--tm); }
+
+    /* ─── Liste des alertes ─── */
+    .alerts-list { display: flex; flex-direction: column; gap: 14px; }
+    .alert-item { background: rgba(12,31,20,.5); border-radius: 16px; padding: 20px; position: relative; overflow: hidden; transition: all .3s; border-left: 4px solid transparent; }
+    .alert-item:hover { transform: translateX(4px); background: rgba(12,31,20,.7); }
+    .alert-item.critical { border-left-color: var(--red); }
+    .alert-item.warning  { border-left-color: var(--amber); }
+    .alert-item.info     { border-left-color: var(--teal); }
+    .alert-item.success  { border-left-color: var(--green); }
+    .alert-item.acquittee { opacity: .65; }
+    .alert-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .alert-title    { font-size: 15px; font-weight: 700; color: var(--t1); margin-bottom: 4px; }
+    .alert-subtitle { font-size: 12px; color: var(--t3); }
+    .alert-body     { font-size: 13px; color: var(--t3); line-height: 1.7; margin-bottom: 12px; }
+    .alert-meta { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+    .alert-meta-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--tm); }
+    .alert-actions { display: flex; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(74,222,128,.08); flex-wrap: wrap; }
+    .risk-bar { height: 4px; border-radius: 2px; background: rgba(74,222,128,.1); margin-top: 10px; overflow: hidden; }
+    .risk-fill { height: 100%; border-radius: 2px; transition: width .6s ease; }
+
+    /* ─── États vides / chargement ─── */
+    .loading-state, .empty-state { text-align: center; padding: 60px 20px; color: var(--tm); }
+    .loading-spinner { width: 36px; height: 36px; border: 3px solid rgba(74,222,128,.15); border-top-color: var(--green); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-text { font-size: 15px; font-weight: 600; color: var(--t2); margin-bottom: 6px; }
+    .empty-sub  { font-size: 13px; }
+
+    /* ─── Indicateur de rafraîchissement ─── */
+    .refresh-indicator { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--tm); }
+    .refresh-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* ─── Modal de détail ─── */
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+    .detail-item label { font-size: 11px; font-weight: 700; color: var(--tm); text-transform: uppercase; letter-spacing: .08em; display: block; margin-bottom: 4px; }
+    .detail-item span  { font-size: 14px; color: var(--t1); }
+    .action-box { background: rgba(74,222,128,.06); border: 1px solid rgba(74,222,128,.15); border-radius: 12px; padding: 14px; margin-top: 14px; font-size: 13px; color: var(--t2); line-height: 1.7; }
+    .action-box strong { color: var(--green); display: block; margin-bottom: 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+
+    @media (max-width: 900px) {
+      .alerts-stats { grid-template-columns: repeat(2,1fr); }
+      .weather-conditions { grid-template-columns: 1fr; }
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body class="grid-bg">
+  <div class="app-container">
+
+    <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M12 3C9 3 5 7 5 12c0 3 1.4 5.5 3.5 7" stroke="#f0fdf4" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M12 3c3 0 7 4 7 9c0 3-1.4 5.5-3.5 7" stroke="#a3e635" stroke-width="1.8" stroke-linecap="round"/>
+              <path d="M12 22V11M8.5 15l3.5-4 3.5 4" stroke="#f0fdf4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="sidebar-logo-text">
+            <div class="sidebar-logo-title">Phyto<span>Sentinel</span></div>
+            <div class="sidebar-logo-subtitle">DSA · Guelma · Inspection</div>
+          </div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="system-status"><div class="system-status-dot blink"></div><span class="system-status-text">Système actif</span></div>
+        <div class="nav-section">
+          <div class="nav-section-title">Principal</div>
+          <a href="index.html" class="nav-item"><span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><span class="nav-item-text">Accueil</span></a>
+          <a href="detection.html" class="nav-item"><span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></span><span class="nav-item-text">Détection IA</span></a>
+          <a href="maladies.html" class="nav-item"><span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span><span class="nav-item-text">Gestion Maladies</span></a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Surveillance</div>
+          <a href="carte.html" class="nav-item"><span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></span><span class="nav-item-text">Carte Sanitaire</span></a>
+          <a href="alertes.html" class="nav-item active"><span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></span><span class="nav-item-text">Alertes</span><span class="nav-item-badge" id="sidebarBadge">–</span></a>
+          <a href="rapports.html" class="nav-item"><span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></span><span class="nav-item-text">Rapports</span></a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Administration</div>
+          <a href="database.html" class="nav-item"><span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></span><span class="nav-item-text">Base de Données</span></a>
+          <a href="parametres.html" class="nav-item"><span class="nav-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span><span class="nav-item-text">Paramètres</span></a>
+        </div>
+      </nav>
+      <div class="sidebar-footer"><button class="sidebar-toggle" onclick="Sidebar.toggle()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg></button></div>
+    </aside>
+
+    <!-- ═══════════════════ MAIN ═══════════════════ -->
+    <main class="main-content">
+      <header class="header">
+        <div class="header-left">
+          <div class="header-breadcrumb"><a href="index.html">PhytoSentinel</a><span>/</span><span>Alertes</span></div>
+        </div>
+        <div class="header-actions">
+          <!-- Indicateur de rafraîchissement automatique -->
+          <div class="refresh-indicator" id="refreshIndicator">
+            <div class="refresh-dot"></div>
+            <span id="refreshCountdown">Actualisation dans 30s</span>
+          </div>
+          <div class="header-user">
+            <div class="header-user-avatar">MA</div>
+            <div class="header-user-info">
+              <div class="header-user-name">M. Amara</div>
+              <div class="header-user-role">Inspecteur DSA</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="page-content">
+
+        <!-- En-tête de page -->
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;">
+          <div>
+            <h1 class="page-title">Système d'Alerte Précoce</h1>
+            <p class="page-subtitle">Alertes intelligentes basées sur les conditions météo et les profils des cultures</p>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-o" onclick="triggerGenerate()" id="generateBtn" title="Lancer l'analyse météo et générer de nouvelles alertes">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Analyser
+            </button>
+            <button class="btn" onclick="Modal.show('newAlertModal')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nouvelle Alerte
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Statistiques ── -->
+        <div class="alerts-stats">
+          <div class="alert-stat-card critical"><div class="alert-stat-icon">🚨</div><div class="alert-stat-value critical" id="statCritical">–</div><div class="alert-stat-label">Alertes critiques</div></div>
+          <div class="alert-stat-card warning"><div class="alert-stat-icon">⚠️</div><div class="alert-stat-value warning" id="statWarning">–</div><div class="alert-stat-label">Avertissements</div></div>
+          <div class="alert-stat-card info"><div class="alert-stat-icon">ℹ️</div><div class="alert-stat-value info" id="statInfo">–</div><div class="alert-stat-label">Informations</div></div>
+          <div class="alert-stat-card success"><div class="alert-stat-icon">✅</div><div class="alert-stat-value success" id="statResolved">–</div><div class="alert-stat-label">Résolues</div></div>
+        </div>
+
+        <!-- ── Météo actuelle ── -->
+        <h3 style="font-size:15px;font-weight:700;color:var(--t1);margin-bottom:14px;">🌤️ Conditions météo actuelles — Guelma</h3>
+        <div class="weather-conditions" id="weatherCards">
+          <!-- Injecté dynamiquement -->
+          <div class="loading-state" style="grid-column:1/-1;padding:30px">
+            <div class="loading-spinner"></div>
+            <div style="font-size:13px">Chargement météo...</div>
+          </div>
+        </div>
+
+        <!-- ── Filtres & Recherche ── -->
+        <div class="filters-bar">
+          <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">Toutes</button>
+          <button class="filter-btn f-critical" data-filter="critical" onclick="setFilter('critical', this)">🚨 Critiques</button>
+          <button class="filter-btn f-warning"  data-filter="warning"  onclick="setFilter('warning', this)">⚠️ Avertissements</button>
+          <button class="filter-btn f-info"      data-filter="info"     onclick="setFilter('info', this)">ℹ️ Informations</button>
+          <button class="filter-btn"             data-filter="resolue"  onclick="setFilter('resolue', this)">✅ Résolues</button>
+          <input type="text" class="search-box" id="searchInput" placeholder="🔍 Rechercher une alerte, commune, plante..." oninput="onSearch()">
+        </div>
+
+        <!-- ── Liste des alertes ── -->
+        <h3 style="font-size:16px;font-weight:700;color:var(--t1);margin-bottom:16px;">🔔 Alertes émises</h3>
+        <div class="alerts-list" id="alertsList">
+          <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <div style="font-size:13px;margin-top:8px">Chargement des alertes...</div>
+          </div>
+        </div>
+   <!-- ── Alertes Système Expert ── -->
+<div style="margin-top:0;padding:0 28px 28px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div>
+      <h3 style="font-size:16px;font-weight:700;color:var(--t1);margin-bottom:4px;">
+        🤖 Alertes Phytosanitaires — Système Expert Météo
+      </h3>
+      <div id="expertRiskScore" style="font-size:13px;color:var(--tm);">Analyse en cours...</div>
+    </div>
+    <span id="expertAlertsCount" class="badge b-r">–</span>
+  </div>
+  <div id="expertAlertsList" class="alerts-list">
+    <div class="loading-state"><div class="loading-spinner"></div></div>
+  </div>
+</div>
+      </div><!-- /page-content -->
+    </main>
+  </div><!-- /app-container -->
+
+
+  <!-- ═══════════════════ MODAL: DÉTAIL ALERTE ═══════════════════ -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal" style="max-width:560px">
+      <div class="modal-header">
+        <h3 class="modal-title" id="detailModalTitle">Détail de l'alerte</h3>
+        <button class="modal-close" onclick="Modal.hide('detailModal')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div id="detailModalBody" style="padding:0 24px 8px">
+        <!-- Contenu injecté dynamiquement -->
+      </div>
+      <div class="modal-footer" id="detailModalFooter">
+        <button class="btn btn-o" onclick="Modal.hide('detailModal')">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════ MODAL: NOUVELLE ALERTE ═══════════════════ -->
+  <div class="modal-overlay" id="newAlertModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Nouvelle Alerte Manuelle</h3>
+        <button class="modal-close" onclick="Modal.hide('newAlertModal')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div style="padding:0 24px">
+        <div class="form-group">
+          <label class="form-label">TYPE D'ALERTE</label>
+          <select class="form-select" id="newType">
+            <option value="critical">🚨 Critique</option>
+            <option value="warning" selected>⚠️ Avertissement</option>
+            <option value="info">ℹ️ Information</option>
+            <option value="inspection">🔍 Inspection</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">TITRE *</label>
+          <input type="text" class="form-input" id="newTitle" placeholder="Ex: Mildiou détecté — Secteur Nord">
+        </div>
+        <div class="form-group">
+          <label class="form-label">DESCRIPTION</label>
+          <textarea class="form-textarea" id="newDescription" rows="3" placeholder="Détails de l'observation..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">CULTURE CONCERNÉE</label>
+            <select class="form-select" id="newPlant">
+              <option value="">Toutes cultures</option>
+              <!-- Options injectées dynamiquement -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">COMMUNE</label>
+            <select class="form-select" id="newCommune">
+              <option value="Guelma-Centre">Guelma-Centre</option>
+              <option value="Belkheir">Belkheir</option>
+              <option value="Bouchegouf">Bouchegouf</option>
+              <option value="Oued Zenati">Oued Zenati</option>
+              <option value="Hammam Debagh">Hammam Debagh</option>
+              <option value="El Fedjoudj">El Fedjoudj</option>
+              <option value="Bouati Mahmoud">Bouati Mahmoud</option>
+              <option value="Khezaras">Khezaras</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">ACTION RECOMMANDÉE</label>
+          <input type="text" class="form-input" id="newAction" placeholder="Ex: Appliquer fongicide X, inspecter parcelles...">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-o" onclick="Modal.hide('newAlertModal')">Annuler</button>
+        <button class="btn" onclick="submitNewAlert()">Créer l'alerte</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="../js/utils.js"></script>
+  <script>
+  /* ============================================================
+     PhytoSentinel — Alertes Dynamiques
+     Auteur: DSA Guelma
+  ============================================================ */
+
+  const API = 'http://localhost:5000/api';
+
+  // État de l'application
+  const state = {
+    filter: 'all',
+    statut: 'active',
+    search: '',
+    refreshTimer: null,
+    countdown: 30,
+    weather: null, 
+  };
+
+  // ─── INITIALISATION ───────────────────────────────────────
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadStats();
+    loadWeather();
+    loadAlerts();
+    loadPlantsForForm();
+    startAutoRefresh();
+  });
+
+
+  // ─── STATISTIQUES ─────────────────────────────────────────
+
+  async function loadStats() {
+    try {
+      const res = await fetch(`${API}/alerts/stats`);
+      const s = await res.json();
+      animateCounter('statCritical', s.critical || 0);
+      animateCounter('statWarning',  s.warning  || 0);
+      animateCounter('statInfo',     s.info     || 0);
+      animateCounter('statResolved', s.resolved || 0);
+      // Mettre à jour le badge dans la sidebar
+      const badge = document.getElementById('sidebarBadge');
+      const total = (s.critical || 0) + (s.warning || 0);
+      badge.textContent = total > 0 ? total : '✓';
+      badge.style.background = s.critical > 0 ? 'rgba(248,113,113,.3)' : '';
+    } catch (e) {
+      console.error('Erreur stats:', e);
+    }
+  }
+
+  function animateCounter(id, target) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    let current = 0;
+    const step = Math.max(1, Math.ceil(target / 20));
+    const interval = setInterval(() => {
+      current = Math.min(current + step, target);
+      el.textContent = current;
+      if (current >= target) clearInterval(interval);
+    }, 40);
+  }
+
+
+  // ─── MÉTÉO ────────────────────────────────────────────────
+
+async function loadWeather() {
+  const container = document.getElementById('weatherCards');
+  try {
+    const res = await fetch(
+      'https://api.open-meteo.com/v1/forecast?latitude=36.46&longitude=7.43&current=temperature_2m,relative_humidity_2m,windspeed_10m&timezone=Africa/Algiers'
+    );
+    const d = await res.json();
+    const curr = d.current;
+    const w = {
+      temperature: curr.temperature_2m,
+      humidity: curr.relative_humidity_2m,
+      wind_speed: curr.windspeed_10m,
+    };
+    // حفظ للاستخدام في النظام الخبير
+    state.weather = w;
+    renderWeather(w);
+    // بعد تحميل الطقس، شغّل النظام الخبير
+    loadExpertAlerts(w);
+  } catch (e) {
+    container.innerHTML = `<div class="weather-card"><div class="weather-card-header"><span class="weather-card-title">⚠️ Météo indisponible</span></div><div class="weather-desc">Vérifiez la connexion Internet</div></div>`;
+  }
+}
+async function loadExpertAlerts(w) {
+  const expertSection = document.getElementById('expertAlertsList');
+  const expertCount   = document.getElementById('expertAlertsCount');
+  if (!expertSection) return;
+
+  expertSection.innerHTML = `<div class="loading-state" style="padding:20px"><div class="loading-spinner"></div></div>`;
+
+  try {
+    const res = await fetch(`${API}/expert/weather-alerts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        weather: { temp: w.temperature, humidity: w.humidity, wind: w.wind_speed }
+      })
+    });
+    const d = await res.json();
+    const alerts = d.alerts || [];
+    const risk   = d.risk_level || null;
+
+    expertCount.textContent = alerts.length;
+
+    if (risk) {
+      const colorMap = { critical:'var(--red)', moderate:'var(--amber)', low:'var(--lime)', minimal:'var(--green)' };
+      document.getElementById('expertRiskScore').innerHTML =
+        `<span style="color:${colorMap[risk.level]}">⚠️ Risque global : <strong>${risk.label}</strong> (${risk.score}/100)</span>`;
+    }
+
+    if (!alerts.length) {
+      expertSection.innerHTML = `
+        <div class="empty-state" style="padding:30px">
+          <div class="empty-icon">✅</div>
+          <div class="empty-text">Aucun risque phytosanitaire détecté</div>
+          <div class="empty-sub">Conditions météo actuelles favorables</div>
+        </div>`;
+      return;
+    }
+
+    const severityMap = {
+      critical: { cls: 'critical', badge: '🚨 CRITIQUE',    color: 'var(--red)' },
+      moderate: { cls: 'warning',  badge: '⚠️ MODÉRÉ',      color: 'var(--amber)' },
+      low:      { cls: 'info',     badge: 'ℹ️ FAIBLE',       color: 'var(--teal)' },
+    };
+
+    expertSection.innerHTML = alerts.map(a => {
+      const s = severityMap[a.severity] || severityMap.moderate;
+      const recs = (a.recommendations || []).slice(0, 3)
+        .map(r => `<li style="margin-bottom:3px">${r}</li>`).join('');
+      return `
+      <div class="alert-item ${s.cls}">
+        <div class="alert-header">
+          <div>
+            <span class="badge ${s.cls === 'critical' ? 'b-r' : s.cls === 'warning' ? 'b-a' : 'b-t'}" style="margin-bottom:8px">
+              ${s.badge}
+            </span>
+            <div class="alert-title">${a.culture_icon || '🌿'} ${a.disease_name}</div>
+            <div class="alert-subtitle">Culture : <strong>${a.culture_name}</strong></div>
+          </div>
+          <span style="font-size:11px;color:var(--tm);white-space:nowrap">🤖 Système Expert</span>
+        </div>
+        <div class="alert-body">${a.message}</div>
+        ${recs ? `
+        <div style="margin-top:10px;padding:10px;background:rgba(74,222,128,.05);border-radius:8px;border:1px solid rgba(74,222,128,.1)">
+          <div style="font-size:11px;font-weight:700;color:var(--tm);margin-bottom:6px">✅ RECOMMANDATIONS</div>
+          <ul style="font-size:12px;color:var(--t3);padding-left:16px;margin:0">${recs}</ul>
+        </div>` : ''}
+        <div class="alert-meta" style="margin-top:10px">
+          <span class="alert-meta-item">🌡️ ${a.weather_trigger?.temp}°C</span>
+          <span class="alert-meta-item">💧 ${a.weather_trigger?.humidity}%</span>
+          <span class="alert-meta-item">🌬️ ${a.weather_trigger?.wind} km/h</span>
+        </div>
+      </div>`;
+    }).join('');
+
+  } catch(e) {
+    expertSection.innerHTML = `<div class="empty-state" style="padding:20px"><div class="empty-sub">Erreur: vérifiez que le backend Flask est actif</div></div>`;
+  }
+}
+  function renderWeather(w) {
+    const container = document.getElementById('weatherCards');
+    const tempColor = w.temperature > 30 ? 'var(--red)' : w.temperature > 24 ? 'var(--amber)' : 'var(--teal)';
+    const humColor  = w.humidity > 80 ? 'var(--red)' : w.humidity > 70 ? 'var(--amber)' : 'var(--teal)';
+    const windColor = w.wind_speed > 50 ? 'var(--red)' : w.wind_speed > 30 ? 'var(--amber)' : 'var(--lime)';
+    const tempBadge = w.temperature > 30 ? '<span class="badge b-r">Stress thermique</span>' : w.temperature > 24 ? '<span class="badge b-a">Risque élevé</span>' : '<span class="badge b-g">Normal</span>';
+    const humBadge  = w.humidity > 80 ? '<span class="badge b-r">Niveau critique</span>' : w.humidity > 70 ? '<span class="badge b-a">Élevé</span>' : '<span class="badge b-g">Normal</span>';
+    const windBadge = w.wind_speed > 50 ? '<span class="badge b-r">Fort</span>' : w.wind_speed > 30 ? '<span class="badge b-a">Modéré</span>' : '<span class="badge b-g">Normal</span>';
+    const tempFill  = Math.min(100, (w.temperature / 45) * 100);
+    const humFill   = w.humidity;
+    const windFill  = Math.min(100, (w.wind_speed / 100) * 100);
+    const updated   = w.fetched_at ? new Date(w.fetched_at).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'}) : '';
+
+    container.innerHTML = `
+      <div class="weather-card">
+        <div class="weather-card-header"><span class="weather-card-title">🌡️ Température</span>${tempBadge}</div>
+        <div class="weather-value" style="color:${tempColor}">${w.temperature}°C</div>
+        <div class="weather-desc">${w.description || '—'}</div>
+        <div class="bar" style="margin-top:12px"><div class="fill" style="width:${tempFill}%;background:linear-gradient(90deg,var(--amber),#f97316)"></div></div>
+        <div class="weather-updated">Mis à jour ${updated}</div>
+      </div>
+      <div class="weather-card">
+        <div class="weather-card-header"><span class="weather-card-title">💧 Humidité</span>${humBadge}</div>
+        <div class="weather-value" style="color:${humColor}">${w.humidity}%</div>
+        <div class="weather-desc">${w.humidity > 80 ? 'Favorise les champignons' : w.humidity > 70 ? 'Surveillance recommandée' : 'Conditions acceptables'}</div>
+        <div class="bar" style="margin-top:12px"><div class="fill" style="width:${humFill}%;background:linear-gradient(90deg,var(--teal),var(--green))"></div></div>
+        <div class="weather-updated">Guelma, Algérie</div>
+      </div>
+      <div class="weather-card">
+        <div class="weather-card-header"><span class="weather-card-title">🌬️ Vent ${w.wind_direction || ''}</span>${windBadge}</div>
+        <div class="weather-value" style="color:${windColor}">${w.wind_speed} km/h</div>
+        <div class="weather-desc">${w.wind_speed > 30 ? 'Transport de spores actif' : 'Faible propagation aérienne'}</div>
+        <div class="bar" style="margin-top:12px"><div class="fill" style="width:${windFill}%;background:linear-gradient(90deg,var(--lime),var(--green))"></div></div>
+        <div class="weather-updated">Pression: ${w.pressure || '—'} hPa</div>
+      </div>`;
+  }
+
+
+  // ─── ALERTES ──────────────────────────────────────────────
+
+  async function loadAlerts() {
+    const list = document.getElementById('alertsList');
+    list.innerHTML = `<div class="loading-state"><div class="loading-spinner"></div><div style="font-size:13px;margin-top:8px">Chargement...</div></div>`;
+
+    try {
+      const params = new URLSearchParams();
+      if (state.filter !== 'all' && state.filter !== 'resolue') {
+        params.set('niveau', state.filter);
+        params.set('statut', 'active');
+      } else if (state.filter === 'resolue') {
+        params.set('statut', 'resolue');
+      } else {
+        params.set('statut', 'active');
+      }
+      if (state.search) params.set('search', state.search);
+
+      // ✅ الكود الصحيح
+      const res = await fetch(`${API}/alerts?${params}`);
+      const data = await res.json();
+      renderAlerts(data.alerts || []);
+    } catch (e) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">⚡</div>
+          <div class="empty-text">Serveur Flask inaccessible</div>
+          <div class="empty-sub">Lancez <code>python alerts.py</code> dans le dossier backend</div>
+        </div>`;
+    }
+  }
+
+  function renderAlerts(alerts) {
+    const list = document.getElementById('alertsList');
+    if (!alerts || alerts.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">✅</div>
+          <div class="empty-text">Aucune alerte pour ce filtre</div>
+          <div class="empty-sub">Cliquez sur "Analyser" pour générer de nouvelles alertes météo</div>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = alerts.map(a => buildAlertCard(a)).join('');
+  }
+
+  function buildAlertCard(a) {
+    const levelMap = {
+      critical: { badge: '🚨 ALERTE CRITIQUE', cls: 'b-r', timeColor: 'var(--red)' },
+      warning:  { badge: '⚠ AVERTISSEMENT',   cls: 'b-a', timeColor: 'var(--amber)' },
+      info:     { badge: 'ℹ INFORMATION',      cls: 'b-t', timeColor: 'var(--teal)' },
+      success:  { badge: '✅ RÉSOLU',          cls: 'b-g', timeColor: 'var(--green)' },
+    };
+    const l = levelMap[a.niveau] || levelMap.info;
+    const time = timeAgo(a.created_at);
+    const risk = a.risque_pourcent || 0;
+    const riskColor = risk >= 75 ? 'var(--red)' : risk >= 50 ? 'var(--amber)' : risk >= 25 ? 'var(--teal)' : 'var(--green)';
+    const acquitteeCls = a.statut === 'acquittee' ? ' acquittee' : '';
+
+    // Boutons selon statut
+    let actions = '';
+    if (a.statut === 'active') {
+      actions = `
+        <button class="btn btn-sm" onclick="updateStatus(${a.id}, 'acquittee')">Acquitter</button>
+        <button class="btn btn-sm" onclick="updateStatus(${a.id}, 'resolue')">Résoudre</button>
+        <button class="btn btn-sm btn-o" onclick="viewDetail(${a.id})">Détails</button>`;
+    } else if (a.statut === 'acquittee') {
+      actions = `
+        <button class="btn btn-sm" onclick="updateStatus(${a.id}, 'resolue')">Marquer résolu</button>
+        <button class="btn btn-sm btn-o" onclick="viewDetail(${a.id})">Détails</button>`;
+    } else {
+      actions = `<button class="btn btn-sm btn-o" onclick="viewDetail(${a.id})">Voir rapport</button>`;
+    }
+
+    const plantInfo = a.plante_nom ? `<span class="alert-meta-item">🌿 ${a.plante_nom}</span>` : '';
+
+    return `
+      <div class="alert-item ${a.niveau}${acquitteeCls}" id="alert-${a.id}">
+        <div class="alert-header">
+          <div>
+            <span class="badge ${l.cls}" style="margin-bottom:8px">${l.badge}</span>
+            <div class="alert-title">${escapeHtml(a.titre)}</div>
+            <div class="alert-subtitle">Risque estimé: <strong style="color:${riskColor}">${risk}%</strong> · ${escapeHtml(a.commune || '')}</div>
+          </div>
+          <span style="font-size:12px;color:${l.timeColor};font-weight:600;white-space:nowrap;margin-left:12px">${time}</span>
+        </div>
+        <div class="alert-body">${escapeHtml(a.description || '')}</div>
+        <div class="risk-bar"><div class="risk-fill" style="width:${risk}%;background:${riskColor}"></div></div>
+        <div class="alert-meta">
+          <span class="alert-meta-item">📍 ${escapeHtml(a.commune || 'Guelma')}</span>
+          ${plantInfo}
+          ${a.temperature != null ? `<span class="alert-meta-item">🌡️ ${a.temperature}°C / 💧 ${a.humidity}%</span>` : ''}
+        </div>
+        <div class="alert-actions">${actions}</div>
+      </div>`;
+  }
+
+
+  // ─── ACTIONS ──────────────────────────────────────────────
+
+  async function updateStatus(id, statut) {
+    try {
+      // ✅ الرابط الصحيح
+       const res = await fetch(`${API}/alerts/${id}/resolve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note: statut }),
+       });
+      if (!res.ok) throw new Error();
+      const msg = { acquittee: 'Alerte acquittée', resolue: 'Alerte marquée comme résolue' };
+      PhytoSentinel.Notifications.success(msg[statut] || 'Statut mis à jour');
+      loadAlerts();
+      loadStats();
+    } catch {
+      PhytoSentinel.Notifications.error('Erreur lors de la mise à jour');
+    }
+  }
+
+  async function viewDetail(id) {
+    try {
+      const res = await fetch(`${API}/alerts/${id}`);
+      const a = await res.json();
+
+      document.getElementById('detailModalTitle').textContent = a.titre;
+      document.getElementById('detailModalBody').innerHTML = `
+        <div class="detail-grid">
+          <div class="detail-item"><label>Niveau</label><span>${badgeHtml(a.niveau)}</span></div>
+          <div class="detail-item"><label>Statut</label><span>${statutBadge(a.statut)}</span></div>
+          <div class="detail-item"><label>Culture</label><span>${a.plante_nom || '—'} ${a.nom_scientifique ? `<em style="color:var(--tm)">(${a.nom_scientifique})</em>` : ''}</span></div>
+          <div class="detail-item"><label>Commune</label><span>📍 ${a.commune || '—'}</span></div>
+          <div class="detail-item"><label>Température</label><span>${a.temperature != null ? a.temperature + '°C' : '—'}</span></div>
+          <div class="detail-item"><label>Humidité</label><span>${a.humidity != null ? a.humidity + '%' : '—'}</span></div>
+          <div class="detail-item"><label>Score de risque</label><span style="color:var(--amber);font-weight:700">${a.risque_pourcent || 0}%</span></div>
+          <div class="detail-item"><label>Pathogène</label><span>${a.pathogene || '—'}</span></div>
+          <div class="detail-item" style="grid-column:1/-1"><label>Description</label><span>${escapeHtml(a.description || '—')}</span></div>
+          <div class="detail-item" style="grid-column:1/-1"><label>Date</label><span>${a.created_at ? new Date(a.created_at).toLocaleString('fr-FR') : '—'}</span></div>
+        </div>
+        ${a.action_recommandee ? `<div class="action-box"><strong>🌿 Action recommandée</strong>${escapeHtml(a.action_recommandee)}</div>` : ''}
+        ${a.traitement_recommande ? `<div class="action-box" style="margin-top:10px;border-color:rgba(45,212,191,.2)"><strong>💊 Traitement</strong>${escapeHtml(a.traitement_recommande)}</div>` : ''}
+      `;
+
+      // Boutons dans le footer selon statut
+      const footer = document.getElementById('detailModalFooter');
+      let btns = `<button class="btn btn-o" onclick="Modal.hide('detailModal')">Fermer</button>`;
+      if (a.statut === 'active') {
+        btns += `<button class="btn" onclick="updateStatus(${a.id},'resolue');Modal.hide('detailModal')">Marquer résolu</button>`;
+      }
+      footer.innerHTML = btns;
+
+      Modal.show('detailModal');
+    } catch (e) {
+      PhytoSentinel.Notifications.error('Impossible de charger les détails');
+    }
+  }
+
+  async function triggerGenerate() {
+    const btn = document.getElementById('generateBtn');
+    btn.disabled = true;
+    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin .8s linear infinite"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0"/></svg> Analyse...`;
+    try {
+      const res = await fetch(`${API}/alerts/generate`, { method: 'POST' });
+      const data = await res.json();
+      PhytoSentinel.Notifications.success(`✅ ${data.alerts_created} nouvelle(s) alerte(s) générée(s)`);
+      loadAlerts();
+      loadStats();
+      loadWeather();
+    } catch {
+      PhytoSentinel.Notifications.error('Erreur de connexion au serveur');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Analyser`;
+    }
+  }
+
+  async function submitNewAlert() {
+    const titre = document.getElementById('newTitle').value.trim();
+    if (!titre) {
+      PhytoSentinel.Notifications.error('Le titre est obligatoire');
+      return;
+    }
+    const payload = {
+      titre,
+      description:        document.getElementById('newDescription').value,
+      type_alerte:        document.getElementById('newType').value,
+      niveau:             document.getElementById('newType').value === 'critical' ? 'critical' : 'warning',
+      plante_id:          document.getElementById('newPlant').value || null,
+      commune:            document.getElementById('newCommune').value,
+      action_recommandee: document.getElementById('newAction').value,
+    };
+    try {
+      const res = await fetch(`${API}/alerts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error();
+      PhytoSentinel.Notifications.success('Alerte créée avec succès');
+      Modal.hide('newAlertModal');
+      loadAlerts();
+      loadStats();
+      // Reset form
+      ['newTitle','newDescription','newAction'].forEach(id => document.getElementById(id).value = '');
+    } catch {
+      PhytoSentinel.Notifications.error('Erreur lors de la création');
+    }
+  }
+
+  async function loadPlantsForForm() {
+    try {
+      const res = await fetch(`${API}/plants`);
+      const plants = await res.json();
+      const sel = document.getElementById('newPlant');
+      plants.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.nom} (${p.maladie_principale})`;
+        sel.appendChild(opt);
+      });
+    } catch {}
+  }
+
+
+  // ─── FILTRES ──────────────────────────────────────────────
+
+  function setFilter(filter, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.filter = filter;
+    loadAlerts();
+  }
+
+  let searchTimeout;
+  function onSearch() {
+    clearTimeout(searchTimeout);
+    state.search = document.getElementById('searchInput').value;
+    searchTimeout = setTimeout(loadAlerts, 350);
+  }
+
+
+  // ─── RAFRAÎCHISSEMENT AUTOMATIQUE ─────────────────────────
+
+  function startAutoRefresh() {
+    const countdownEl = document.getElementById('refreshCountdown');
+    state.countdown = 30;
+    state.refreshTimer = setInterval(() => {
+      state.countdown--;
+      if (state.countdown <= 0) {
+        state.countdown = 30;
+        loadAlerts();
+        loadStats();
+        loadWeather();
+        countdownEl.textContent = 'Actualisation...';
+        setTimeout(() => {
+          countdownEl.textContent = `Actualisation dans ${state.countdown}s`;
+        }, 1500);
+      } else {
+        countdownEl.textContent = `Actualisation dans ${state.countdown}s`;
+      }
+    }, 1000);
+  }
+
+
+  // ─── HELPERS ──────────────────────────────────────────────
+
+  function timeAgo(isoString) {
+    if (!isoString) return '';
+    const diff = (Date.now() - new Date(isoString).getTime()) / 1000;
+    if (diff < 60)    return 'À l\'instant';
+    if (diff < 3600)  return `Il y a ${Math.floor(diff / 60)}min`;
+    if (diff < 86400) return `Il y a ${Math.floor(diff / 3600)}h`;
+    return `Il y a ${Math.floor(diff / 86400)}j`;
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function badgeHtml(niveau) {
+    const map = { critical:'b-r', warning:'b-a', info:'b-t', success:'b-g' };
+    const labels = { critical:'Critique', warning:'Avertissement', info:'Information', success:'Résolu' };
+    return `<span class="badge ${map[niveau] || 'b-t'}">${labels[niveau] || niveau}</span>`;
+  }
+
+  function statutBadge(statut) {
+    const map = { active:'b-r', acquittee:'b-a', resolue:'b-g' };
+    const labels = { active:'Active', acquittee:'Acquittée', resolue:'Résolue' };
+    return `<span class="badge ${map[statut] || 'b-t'}">${labels[statut] || statut}</span>`;
+  }
+  </script>
+</body>
+</html>

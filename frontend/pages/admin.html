@@ -1,0 +1,3344 @@
+<!doctype html>
+<html lang="fr" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PhytoSentinel — Panneau Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ═══════════════════════════════════════════════════════════════
+         VARIABLES & RESET
+      ═══════════════════════════════════════════════════════════════ */
+      :root {
+        --bg-0: #030b05;
+        --bg-1: #061210;
+        --bg-2: #0c1f14;
+        --bg-3: #122819;
+        --green: #4ade80;
+        --green-mid: #22c55e;
+        --green-dk: #166534;
+        --lime: #a3e635;
+        --teal: #2dd4bf;
+        --amber: #fbbf24;
+        --red: #f87171;
+        --purple: #c084fc;
+        --blue: #60a5fa;
+        --t1: #f0fdf4;
+        --t2: #bbf7d0;
+        --t3: #86efac;
+        --tm: rgba(74, 222, 128, 0.45);
+        --sidebar-w: 260px;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: var(--bg-0);
+        color: var(--t1);
+        overflow-x: hidden;
+        min-height: 100vh;
+        background-image:
+          linear-gradient(rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+        background-size: 56px 56px;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      .brand {
+        font-family: "Syne", sans-serif;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      button {
+        cursor: pointer;
+        font-family: "DM Sans", sans-serif;
+      }
+      input,
+      select,
+      textarea {
+        font-family: "DM Sans", sans-serif;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════
+         ANIMATIONS
+      ═══════════════════════════════════════════════════════════════ */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(24px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes slideIn {
+        from {
+          transform: translateX(110%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.25;
+        }
+      }
+      @keyframes spin-slow {
+        from {
+          transform: rotate(0);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes modalIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      @keyframes shimmer {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(100%);
+        }
+      }
+      .pulse {
+        animation: pulse 2s ease-in-out infinite;
+      }
+      .blink {
+        animation: blink 1.8s ease-in-out infinite;
+      }
+      .spin {
+        animation: spin-slow 20s linear infinite;
+      }
+
+      /* ═══════════════════════════════════════════════════════════════
+         APP SHELL
+      ═══════════════════════════════════════════════════════════════ */
+      .app-shell {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* ── SIDEBAR ── */
+      .sidebar {
+        width: var(--sidebar-w);
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background: rgba(6, 18, 16, 0.97);
+        border-right: 1px solid rgba(74, 222, 128, 0.12);
+        backdrop-filter: blur(20px);
+        z-index: 200;
+        display: flex;
+        flex-direction: column;
+        transition: width 0.3s ease;
+      }
+      .sidebar.collapsed {
+        width: 72px;
+      }
+
+      .sidebar-logo {
+        padding: 22px 20px 18px;
+        border-bottom: 1px solid rgba(74, 222, 128, 0.08);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-shrink: 0;
+      }
+      .sidebar-logo .logo-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #22c55e, #166534);
+        border-radius: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .sidebar-logo .logo-text {
+        overflow: hidden;
+        transition:
+          opacity 0.3s,
+          width 0.3s;
+      }
+      .collapsed .logo-text {
+        opacity: 0;
+        width: 0;
+      }
+      .logo-text .brand-name {
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--green);
+        letter-spacing: 0.5px;
+      }
+      .logo-text .brand-sub {
+        font-size: 10px;
+        color: var(--tm);
+        letter-spacing: 0.4px;
+      }
+
+      /* admin badge */
+      .admin-badge {
+        background: linear-gradient(
+          90deg,
+          rgba(192, 132, 252, 0.18),
+          rgba(96, 165, 250, 0.12)
+        );
+        border: 1px solid rgba(192, 132, 252, 0.35);
+        border-radius: 6px;
+        padding: 3px 8px;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--purple);
+        letter-spacing: 0.6px;
+        white-space: nowrap;
+      }
+      .collapsed .admin-badge {
+        display: none;
+      }
+
+      .sidebar-user {
+        padding: 16px 18px;
+        border-bottom: 1px solid rgba(74, 222, 128, 0.08);
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        flex-shrink: 0;
+      }
+      .user-avatar {
+        width: 38px;
+        height: 38px;
+        background: linear-gradient(
+          135deg,
+          rgba(192, 132, 252, 0.2),
+          rgba(96, 165, 250, 0.15)
+        );
+        border: 1.5px solid rgba(192, 132, 252, 0.35);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 16px;
+      }
+      .user-info {
+        overflow: hidden;
+        transition:
+          opacity 0.3s,
+          width 0.3s;
+      }
+      .collapsed .user-info {
+        opacity: 0;
+        width: 0;
+      }
+      .user-info .u-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--t1);
+        white-space: nowrap;
+      }
+      .user-info .u-role {
+        font-size: 11px;
+        color: var(--purple);
+        white-space: nowrap;
+      }
+
+      .sidebar-nav {
+        flex: 1;
+        overflow-y: auto;
+        padding: 14px 12px;
+      }
+      .sidebar-nav::-webkit-scrollbar {
+        width: 3px;
+      }
+      .sidebar-nav::-webkit-scrollbar-thumb {
+        background: rgba(74, 222, 128, 0.2);
+        border-radius: 2px;
+      }
+
+      .nav-section {
+        margin-bottom: 6px;
+      }
+      .nav-label {
+        font-size: 10px;
+        color: var(--tm);
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        padding: 8px 10px 4px;
+        overflow: hidden;
+        transition: opacity 0.3s;
+      }
+      .collapsed .nav-label {
+        opacity: 0;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 12px;
+        border-radius: 12px;
+        font-size: 13.5px;
+        font-weight: 500;
+        color: var(--t3);
+        transition: all 0.2s;
+        cursor: pointer;
+        position: relative;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      .nav-item:hover {
+        background: rgba(74, 222, 128, 0.08);
+        color: var(--t2);
+      }
+      .nav-item.active {
+        background: rgba(192, 132, 252, 0.1);
+        color: var(--purple);
+        font-weight: 600;
+      }
+      .nav-item .nav-icon {
+        flex-shrink: 0;
+        width: 20px;
+        display: flex;
+        justify-content: center;
+      }
+      .nav-item .nav-txt {
+        overflow: hidden;
+        transition:
+          opacity 0.3s,
+          max-width 0.3s;
+        max-width: 200px;
+      }
+      .collapsed .nav-item .nav-txt {
+        opacity: 0;
+        max-width: 0;
+      }
+      .nav-badge {
+        background: var(--red);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 50px;
+        margin-left: auto;
+        flex-shrink: 0;
+      }
+      .collapsed .nav-badge {
+        display: none;
+      }
+
+      .sidebar-tooltip {
+        position: absolute;
+        left: calc(100% + 12px);
+        background: rgba(3, 11, 5, 0.95);
+        border: 1px solid rgba(74, 222, 128, 0.2);
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 12.5px;
+        color: var(--t1);
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateX(-8px);
+        transition: all 0.2s;
+        z-index: 300;
+      }
+      .collapsed .nav-item:hover .sidebar-tooltip {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .sidebar-footer {
+        padding: 14px 12px;
+        border-top: 1px solid rgba(74, 222, 128, 0.08);
+        flex-shrink: 0;
+      }
+      .collapse-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 10px;
+        border-radius: 10px;
+        background: transparent;
+        border: 1px solid rgba(74, 222, 128, 0.12);
+        color: var(--tm);
+        transition: all 0.2s;
+      }
+      .collapse-btn:hover {
+        background: rgba(74, 222, 128, 0.08);
+        color: var(--green);
+      }
+
+      /* ── MAIN ── */
+      .main {
+        margin-left: var(--sidebar-w);
+        min-height: 100vh;
+        transition: margin-left 0.3s;
+      }
+      .main.expanded {
+        margin-left: 72px;
+      }
+
+      /* ── TOPBAR ── */
+      .topbar {
+        height: 64px;
+        background: rgba(6, 18, 16, 0.9);
+        border-bottom: 1px solid rgba(74, 222, 128, 0.1);
+        backdrop-filter: blur(16px);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        padding: 0 28px;
+        gap: 18px;
+      }
+      .topbar-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--t1);
+        flex: 1;
+      }
+      .topbar-title span {
+        color: var(--purple);
+      }
+      .topbar-search {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(74, 222, 128, 0.1);
+        border-radius: 10px;
+        padding: 8px 14px;
+        width: 240px;
+      }
+      .topbar-search input {
+        background: none;
+        border: none;
+        outline: none;
+        color: var(--t1);
+        font-size: 13px;
+        width: 100%;
+      }
+      .topbar-search input::placeholder {
+        color: var(--tm);
+      }
+      .icon-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(74, 222, 128, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--t3);
+        transition: all 0.2s;
+        position: relative;
+      }
+      .icon-btn:hover {
+        background: rgba(74, 222, 128, 0.08);
+        color: var(--green);
+        border-color: rgba(74, 222, 128, 0.25);
+      }
+      .notif-dot {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 7px;
+        height: 7px;
+        background: var(--red);
+        border-radius: 50%;
+        border: 1.5px solid var(--bg-0);
+      }
+
+      /* ═══════════════════════════════════════════════════════════════
+         PAGES
+      ═══════════════════════════════════════════════════════════════ */
+      .page {
+        display: none;
+        padding: 28px;
+        animation: fadeUp 0.4s ease both;
+      }
+      .page.active {
+        display: block;
+      }
+
+      /* ── GLASS CARDS ── */
+      .glass {
+        background: rgba(6, 18, 16, 0.72);
+        border: 1px solid rgba(74, 222, 128, 0.12);
+        border-radius: 18px;
+        backdrop-filter: blur(14px);
+      }
+      .glass-card {
+        background: rgba(6, 18, 16, 0.72);
+        border: 1px solid rgba(74, 222, 128, 0.12);
+        border-radius: 18px;
+        backdrop-filter: blur(14px);
+        padding: 22px;
+      }
+      .stat-card {
+        background: rgba(6, 18, 16, 0.72);
+        border: 1px solid rgba(74, 222, 128, 0.12);
+        border-radius: 16px;
+        padding: 20px;
+        transition: all 0.25s;
+      }
+      .stat-card:hover {
+        border-color: rgba(74, 222, 128, 0.28);
+        background: rgba(12, 31, 20, 0.72);
+      }
+
+      .section-header {
+        margin-bottom: 26px;
+      }
+      .section-header h2 {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--t1);
+        margin-bottom: 4px;
+      }
+      .section-header p {
+        font-size: 13.5px;
+        color: var(--t3);
+      }
+
+      /* ── BADGES ── */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .badge-green {
+        background: rgba(74, 222, 128, 0.12);
+        color: var(--green);
+        border: 1px solid rgba(74, 222, 128, 0.2);
+      }
+      .badge-amber {
+        background: rgba(251, 191, 36, 0.12);
+        color: var(--amber);
+        border: 1px solid rgba(251, 191, 36, 0.2);
+      }
+      .badge-red {
+        background: rgba(248, 113, 113, 0.12);
+        color: var(--red);
+        border: 1px solid rgba(248, 113, 113, 0.2);
+      }
+      .badge-blue {
+        background: rgba(96, 165, 250, 0.12);
+        color: var(--blue);
+        border: 1px solid rgba(96, 165, 250, 0.2);
+      }
+      .badge-purple {
+        background: rgba(192, 132, 252, 0.12);
+        color: var(--purple);
+        border: 1px solid rgba(192, 132, 252, 0.2);
+      }
+      .badge-teal {
+        background: rgba(45, 212, 191, 0.12);
+        color: var(--teal);
+        border: 1px solid rgba(45, 212, 191, 0.2);
+      }
+
+      /* ── BUTTONS ── */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-size: 13.5px;
+        font-weight: 600;
+        border: none;
+        transition: all 0.2s;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #22c55e, #166534);
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(34, 197, 94, 0.25);
+      }
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(34, 197, 94, 0.35);
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--t3);
+        border: 1px solid rgba(74, 222, 128, 0.2);
+      }
+      .btn-ghost:hover {
+        background: rgba(74, 222, 128, 0.08);
+        color: var(--green);
+      }
+      .btn-danger {
+        background: rgba(248, 113, 113, 0.12);
+        color: var(--red);
+        border: 1px solid rgba(248, 113, 113, 0.25);
+      }
+      .btn-danger:hover {
+        background: rgba(248, 113, 113, 0.22);
+      }
+      .btn-sm {
+        padding: 7px 14px;
+        font-size: 12px;
+        border-radius: 8px;
+      }
+      .btn-purple {
+        background: linear-gradient(
+          135deg,
+          rgba(192, 132, 252, 0.25),
+          rgba(96, 165, 250, 0.2)
+        );
+        color: var(--purple);
+        border: 1px solid rgba(192, 132, 252, 0.3);
+      }
+      .btn-purple:hover {
+        background: rgba(192, 132, 252, 0.3);
+      }
+
+      /* ── TABLES ── */
+      .table-wrap {
+        overflow-x: auto;
+        border-radius: 14px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      thead th {
+        padding: 12px 16px;
+        background: rgba(74, 222, 128, 0.05);
+        color: var(--tm);
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        font-size: 11px;
+        text-align: left;
+        white-space: nowrap;
+        border-bottom: 1px solid rgba(74, 222, 128, 0.1);
+      }
+      tbody tr {
+        border-bottom: 1px solid rgba(74, 222, 128, 0.05);
+        transition: background 0.15s;
+      }
+      tbody tr:hover {
+        background: rgba(74, 222, 128, 0.04);
+      }
+      tbody td {
+        padding: 12px 16px;
+        color: var(--t2);
+        vertical-align: middle;
+      }
+      .td-img {
+        width: 52px;
+        height: 52px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid rgba(74, 222, 128, 0.15);
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+      .td-img:hover {
+        transform: scale(1.08);
+      }
+
+      /* ── ENHANCED ANALYSES TABLE ── */
+      .td-img-lg {
+        width: 72px;
+        height: 72px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 1.5px solid rgba(74, 222, 128, 0.18);
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        display: block;
+      }
+      .td-img-lg:hover {
+        transform: scale(1.06);
+        box-shadow: 0 0 12px rgba(74, 222, 128, 0.25);
+      }
+      .td-img-placeholder {
+        width: 72px;
+        height: 72px;
+        border-radius: 12px;
+        background: rgba(74, 222, 128, 0.06);
+        border: 1.5px dashed rgba(74, 222, 128, 0.18);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+      }
+      .farmer-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .farmer-name {
+        font-weight: 600;
+        color: var(--t1);
+        font-size: 13px;
+      }
+      .farmer-username {
+        font-size: 11px;
+        color: var(--purple);
+        opacity: 0.8;
+      }
+      .farmer-commune {
+        font-size: 11px;
+        color: var(--tm);
+        margin-top: 2px;
+      }
+      .disease-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .disease-name {
+        font-weight: 600;
+        color: var(--t1);
+        font-size: 13px;
+      }
+      .disease-scientific {
+        font-size: 11px;
+        color: var(--tm);
+        font-style: italic;
+      }
+      .disease-plant {
+        font-size: 11px;
+        color: var(--teal);
+        margin-top: 1px;
+      }
+      .mini-conf-bar {
+        width: 80px;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.07);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 4px;
+      }
+      .mini-conf-fill {
+        height: 100%;
+        border-radius: 4px;
+        background: linear-gradient(90deg, var(--green-mid), var(--lime));
+        transition: width 0.4s ease;
+      }
+      .conf-val {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--green);
+      }
+      .conf-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 90px;
+      }
+      .analysis-date-cell {
+        color: var(--tm);
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      .btn-detail {
+        background: rgba(74, 222, 128, 0.08);
+        border: 1px solid rgba(74, 222, 128, 0.25);
+        color: var(--green);
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          background 0.18s,
+          border-color 0.18s,
+          transform 0.15s;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .btn-detail:hover {
+        background: rgba(74, 222, 128, 0.16);
+        border-color: rgba(74, 222, 128, 0.5);
+        transform: translateY(-1px);
+      }
+      .analyses-summary-bar {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 12px 20px;
+        background: rgba(74, 222, 128, 0.04);
+        border-bottom: 1px solid rgba(74, 222, 128, 0.08);
+        font-size: 12px;
+        color: var(--tm);
+        flex-wrap: wrap;
+      }
+      .analyses-summary-bar .sum-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .analyses-summary-bar .sum-val {
+        color: var(--green);
+        font-weight: 700;
+      }
+
+      /* ── STAT ROW ── */
+      .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+      .stat-card .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        margin-bottom: 12px;
+      }
+      .stat-card .stat-num {
+        font-size: 28px;
+        font-weight: 800;
+        font-family: "Syne", sans-serif;
+      }
+      .stat-card .stat-lbl {
+        font-size: 12px;
+        color: var(--t3);
+        margin-top: 2px;
+      }
+      .stat-card .stat-sub {
+        font-size: 11px;
+        color: var(--tm);
+        margin-top: 4px;
+      }
+
+      /* ── ANALYSIS CARD (grid view) ── */
+      .analyses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 18px;
+      }
+      .analysis-card {
+        background: rgba(6, 18, 16, 0.72);
+        border: 1px solid rgba(74, 222, 128, 0.12);
+        border-radius: 16px;
+        overflow: hidden;
+        transition: all 0.25s;
+      }
+      .analysis-card:hover {
+        border-color: rgba(74, 222, 128, 0.28);
+        transform: translateY(-2px);
+      }
+      .analysis-card .card-img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        background: var(--bg-2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        color: var(--tm);
+      }
+      .analysis-card .card-img img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+      }
+      .analysis-card .card-body {
+        padding: 16px;
+      }
+      .analysis-card .card-disease {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--t1);
+        margin-bottom: 6px;
+      }
+      .analysis-card .card-meta {
+        font-size: 12px;
+        color: var(--t3);
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .analysis-card .card-footer {
+        padding: 12px 16px;
+        border-top: 1px solid rgba(74, 222, 128, 0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      /* confidence bar */
+      .confidence-bar {
+        height: 4px;
+        background: rgba(74, 222, 128, 0.1);
+        border-radius: 99px;
+        overflow: hidden;
+        margin-top: 8px;
+      }
+      .confidence-fill {
+        height: 100%;
+        border-radius: 99px;
+        background: linear-gradient(90deg, #22c55e, #a3e635);
+        transition: width 0.6s ease;
+      }
+
+      /* ── USERS TABLE SPECIFIC ── */
+      .user-row-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: rgba(74, 222, 128, 0.1);
+        border: 1px solid rgba(74, 222, 128, 0.2);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+      }
+
+      /* ── SEARCH / FILTER BAR ── */
+      .filter-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 22px;
+      }
+      .filter-bar .search-input {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(74, 222, 128, 0.12);
+        border-radius: 10px;
+        padding: 9px 14px;
+        flex: 1;
+        min-width: 200px;
+      }
+      .filter-bar .search-input input {
+        background: none;
+        border: none;
+        outline: none;
+        color: var(--t1);
+        font-size: 13px;
+        width: 100%;
+      }
+      .filter-bar .search-input input::placeholder {
+        color: var(--tm);
+      }
+      .filter-select {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(74, 222, 128, 0.12);
+        color: var(--t3);
+        border-radius: 10px;
+        padding: 9px 14px;
+        font-size: 13px;
+        outline: none;
+        cursor: pointer;
+      }
+      .filter-select option {
+        background: #0c1f14;
+      }
+
+      /* ── MODAL ── */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(6px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s;
+      }
+      .modal-overlay.open {
+        opacity: 1;
+        pointer-events: all;
+      }
+      .modal {
+        background: rgba(8, 22, 15, 0.98);
+        border: 1px solid rgba(74, 222, 128, 0.2);
+        border-radius: 24px;
+        padding: 32px;
+        max-width: 560px;
+        width: 100%;
+        animation: modalIn 0.25s ease both;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      .modal h3 {
+        font-size: 18px;
+        font-weight: 800;
+        margin-bottom: 6px;
+        color: var(--t1);
+      }
+      .modal .modal-sub {
+        font-size: 13px;
+        color: var(--t3);
+        margin-bottom: 24px;
+      }
+      .modal-close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: rgba(74, 222, 128, 0.08);
+        border: 1px solid rgba(74, 222, 128, 0.12);
+        color: var(--t3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .modal-close:hover {
+        background: rgba(248, 113, 113, 0.12);
+        color: var(--red);
+        border-color: rgba(248, 113, 113, 0.2);
+      }
+      .modal {
+        position: relative;
+      }
+
+      /* ── FORM ── */
+      .form-group {
+        margin-bottom: 16px;
+      }
+      .form-label {
+        font-size: 12px;
+        color: var(--t3);
+        font-weight: 600;
+        margin-bottom: 7px;
+        display: block;
+        letter-spacing: 0.4px;
+      }
+      .form-input {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(74, 222, 128, 0.15);
+        border-radius: 10px;
+        padding: 11px 14px;
+        color: var(--t1);
+        font-size: 13.5px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .form-input:focus {
+        border-color: rgba(74, 222, 128, 0.4);
+        background: rgba(74, 222, 128, 0.03);
+      }
+      .form-input::placeholder {
+        color: rgba(134, 239, 172, 0.3);
+      }
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
+      /* ── IMAGE PREVIEW MODAL ── */
+      #imgModal .modal {
+        max-width: 700px;
+        background: rgba(3, 11, 5, 0.98);
+        padding: 16px;
+      }
+      #imgModal .modal img {
+        width: 100%;
+        border-radius: 14px;
+        max-height: 75vh;
+        object-fit: contain;
+      }
+
+      /* ── TOAST ── */
+      .toast-container {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 2000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .toast {
+        background: rgba(6, 18, 16, 0.97);
+        border: 1px solid rgba(74, 222, 128, 0.2);
+        border-radius: 12px;
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 13.5px;
+        min-width: 280px;
+        animation: slideIn 0.3s ease both;
+        backdrop-filter: blur(20px);
+      }
+      .toast.success {
+        border-color: rgba(74, 222, 128, 0.4);
+      }
+      .toast.error {
+        border-color: rgba(248, 113, 113, 0.4);
+      }
+      .toast.info {
+        border-color: rgba(96, 165, 250, 0.4);
+      }
+
+      /* ── EMPTY STATE ── */
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 60px 20px;
+        color: var(--tm);
+        text-align: center;
+      }
+      .empty-state .icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.4;
+      }
+      .empty-state h3 {
+        font-size: 18px;
+        color: var(--t3);
+        margin-bottom: 8px;
+      }
+      .empty-state p {
+        font-size: 13px;
+      }
+
+      /* ── LOADING ── */
+      .loading {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 40px;
+        justify-content: center;
+        color: var(--tm);
+      }
+      .spinner {
+        width: 22px;
+        height: 22px;
+        border: 2px solid rgba(74, 222, 128, 0.15);
+        border-top-color: var(--green);
+        border-radius: 50%;
+        animation: spin-slow 0.8s linear infinite;
+      }
+
+      /* ── TABS ── */
+      .tabs {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 24px;
+      }
+      .tab {
+        padding: 9px 18px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--t3);
+        background: transparent;
+        border: 1px solid transparent;
+        transition: all 0.2s;
+      }
+      .tab.active {
+        background: rgba(192, 132, 252, 0.1);
+        color: var(--purple);
+        border-color: rgba(192, 132, 252, 0.25);
+      }
+      .tab:hover:not(.active) {
+        background: rgba(74, 222, 128, 0.06);
+        color: var(--t2);
+      }
+
+      /* ── DETAIL PANEL ── */
+      .detail-kv {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 14px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(74, 222, 128, 0.07);
+      }
+      .detail-row .dk {
+        font-size: 12px;
+        color: var(--tm);
+      }
+      .detail-row .dv {
+        font-size: 13px;
+        color: var(--t2);
+        font-weight: 500;
+      }
+
+      /* ── PAGINATION ── */
+      .pagination {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 20px;
+        justify-content: center;
+      }
+      .pg-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(74, 222, 128, 0.12);
+        color: var(--t3);
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.2s;
+      }
+      .pg-btn:hover {
+        background: rgba(74, 222, 128, 0.08);
+        color: var(--green);
+      }
+      .pg-btn.active {
+        background: rgba(192, 132, 252, 0.15);
+        color: var(--purple);
+        border-color: rgba(192, 132, 252, 0.3);
+      }
+      .pg-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+
+      /* ── SWITCH ── */
+      .view-toggle {
+        display: flex;
+        gap: 4px;
+      }
+      .vt-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(74, 222, 128, 0.12);
+        color: var(--t3);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .vt-btn.active {
+        background: rgba(74, 222, 128, 0.12);
+        color: var(--green);
+        border-color: rgba(74, 222, 128, 0.25);
+      }
+
+      /* ── RESPONSIVE ── */
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 72px;
+        }
+        .sidebar .logo-text,
+        .sidebar .user-info,
+        .sidebar .nav-label,
+        .sidebar .nav-txt,
+        .sidebar .nav-badge,
+        .sidebar .admin-badge {
+          display: none;
+        }
+        .main {
+          margin-left: 72px;
+        }
+        .stats-row {
+          grid-template-columns: 1fr 1fr;
+        }
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <!-- ════════════════════════════════════════
+           SIDEBAR
+      ════════════════════════════════════════ -->
+      <aside class="sidebar" id="sidebar">
+        <!-- Logo -->
+        <div class="sidebar-logo">
+          <div class="logo-icon">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#fff"
+              stroke-width="2.2"
+            >
+              <path
+                d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10A10 10 0 0 1 2 12 10 10 0 0 1 12 2z"
+              />
+              <path d="M12 6v6l4 2" />
+            </svg>
+          </div>
+          <div class="logo-text">
+            <div class="brand-name">PhytoSentinel</div>
+            <div class="brand-sub">PANNEAU ADMIN</div>
+          </div>
+          <div class="admin-badge">ADMIN</div>
+        </div>
+
+        <!-- User info -->
+        <div class="sidebar-user">
+          <div class="user-avatar">🛡️</div>
+          <div class="user-info">
+            <div class="u-name" id="sidebarAdminName">Administrateur</div>
+            <div class="u-role">Accès total système</div>
+          </div>
+        </div>
+
+        <!-- Nav -->
+        <nav class="sidebar-nav">
+          <div class="nav-section">
+            <div class="nav-label">TABLEAU DE BORD</div>
+            <div class="nav-item active" onclick="navigate('dashboard')">
+              <span class="nav-icon">📊</span>
+              <span class="nav-txt">Vue d'ensemble</span>
+              <span class="sidebar-tooltip">Vue d'ensemble</span>
+            </div>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-label">ANALYSES</div>
+            <div class="nav-item" onclick="navigate('analyses')">
+              <span class="nav-icon">🔬</span>
+              <span class="nav-txt">Analyses partagées</span>
+              <span class="nav-badge" id="sidebarBadgeAnalyses">0</span>
+              <span class="sidebar-tooltip">Analyses partagées</span>
+            </div>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-label">UTILISATEURS</div>
+            <div class="nav-item" onclick="navigate('users')">
+              <span class="nav-icon">👥</span>
+              <span class="nav-txt">Gestion des farmers</span>
+              <span class="sidebar-tooltip">Farmers</span>
+            </div>
+            <div class="nav-item" onclick="navigate('admins')">
+              <span class="nav-icon">🛡️</span>
+              <span class="nav-txt">Admins & experts</span>
+              <span class="sidebar-tooltip">Admins</span>
+            </div>
+          </div>
+
+          <div class="nav-section">
+            <div class="nav-label">SYSTÈME</div>
+            <div class="nav-item" onclick="navigate('alerts')">
+              <span class="nav-icon">🚨</span>
+              <span class="nav-txt">Alertes actives</span>
+              <span class="nav-badge" id="sidebarBadgeAlerts">0</span>
+              <span class="sidebar-tooltip">Alertes</span>
+            </div>
+            <div class="nav-item" onclick="navigate('stats')">
+              <span class="nav-icon">📈</span>
+              <span class="nav-txt">Statistiques</span>
+              <span class="sidebar-tooltip">Statistiques</span>
+            </div>
+          </div>
+        </nav>
+
+        <!-- Footer -->
+        <div class="sidebar-footer">
+          <button
+            class="collapse-btn"
+            onclick="toggleSidebar()"
+            id="collapseBtn"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+        </div>
+      </aside>
+
+      <!-- ════════════════════════════════════════
+           MAIN CONTENT
+      ════════════════════════════════════════ -->
+      <main class="main" id="main">
+        <!-- TOPBAR -->
+        <div class="topbar">
+          <div class="topbar-title">
+            <span id="topbarTitle">Tableau de bord</span>
+          </div>
+          <div class="topbar-search">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#4ade80"
+              stroke-width="2"
+              opacity=".5"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Rechercher…"
+              id="globalSearch"
+              oninput="handleGlobalSearch(this.value)"
+            />
+          </div>
+          <button
+            class="icon-btn"
+            onclick="refreshCurrentPage()"
+            title="Actualiser"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="23 4 23 10 17 10" />
+              <polyline points="1 20 1 14 7 14" />
+              <path
+                d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+              />
+            </svg>
+          </button>
+          <button class="icon-btn" onclick="exportCSV()" title="Exporter CSV">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+          </button>
+          <button class="icon-btn" onclick="doLogout()" title="Se déconnecter">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#f87171"
+              stroke-width="2"
+            >
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- ─────────────────────────────────────
+             PAGE: DASHBOARD
+        ───────────────────────────────────── -->
+        <div class="page active" id="page-dashboard">
+          <div class="section-header">
+            <h2>Vue d'ensemble 📊</h2>
+            <p>Résumé de l'activité PhytoSentinel — données en temps réel</p>
+          </div>
+
+          <!-- Stats -->
+          <div class="stats-row" id="dashStats">
+            <div class="stat-card">
+              <div
+                class="stat-icon"
+                style="background: rgba(74, 222, 128, 0.1)"
+              >
+                🔬
+              </div>
+              <div class="stat-num" id="dStatAnalyses">—</div>
+              <div class="stat-lbl">Analyses reçues</div>
+              <div class="stat-sub">envoyées à l'admin</div>
+            </div>
+            <div class="stat-card">
+              <div
+                class="stat-icon"
+                style="background: rgba(96, 165, 250, 0.1)"
+              >
+                👥
+              </div>
+              <div class="stat-num" id="dStatUsers">—</div>
+              <div class="stat-lbl">Farmers actifs</div>
+              <div class="stat-sub">comptes enregistrés</div>
+            </div>
+            <div class="stat-card">
+              <div
+                class="stat-icon"
+                style="background: rgba(248, 113, 113, 0.1)"
+              >
+                🚨
+              </div>
+              <div class="stat-num" id="dStatAlerts">—</div>
+              <div class="stat-lbl">Alertes actives</div>
+              <div class="stat-sub">nécessitent attention</div>
+            </div>
+            <div class="stat-card">
+              <div
+                class="stat-icon"
+                style="background: rgba(251, 191, 36, 0.1)"
+              >
+                🌿
+              </div>
+              <div class="stat-num" id="dStatDiseases">—</div>
+              <div class="stat-lbl">Maladies détectées</div>
+              <div class="stat-sub">types distincts</div>
+            </div>
+          </div>
+
+          <!-- Recent analyses -->
+          <div class="glass-card">
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 18px;
+              "
+            >
+              <h3 style="font-size: 16px; font-weight: 700">
+                Dernières analyses partagées
+              </h3>
+              <button
+                class="btn btn-ghost btn-sm"
+                onclick="navigate('analyses')"
+              >
+                Voir tout →
+              </button>
+            </div>
+            <div id="dashRecentTable">
+              <div class="loading">
+                <div class="spinner"></div>
+                Chargement…
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─────────────────────────────────────
+             PAGE: ANALYSES
+        ───────────────────────────────────── -->
+        <div class="page" id="page-analyses">
+          <div class="section-header">
+            <h2>Analyses partagées 🔬</h2>
+            <p>
+              Uniquement les analyses envoyées par les farmers via "Envoyer à
+              l'admin"
+            </p>
+          </div>
+
+          <div class="filter-bar">
+            <div class="search-input">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#4ade80"
+                stroke-width="2"
+                opacity=".5"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Rechercher par maladie, farmer, commune…"
+                id="analysesSearch"
+                oninput="filterAnalyses()"
+              />
+            </div>
+            <select
+              class="filter-select"
+              id="analysesSeverity"
+              onchange="filterAnalyses()"
+            >
+              <option value="">Toute sévérité</option>
+              <option value="critical">Critique</option>
+              <option value="high">Élevée</option>
+              <option value="moderate">Modérée</option>
+              <option value="low">Faible</option>
+            </select>
+            <select
+              class="filter-select"
+              id="analysesPlant"
+              onchange="filterAnalyses()"
+            >
+              <option value="">Toute plante</option>
+              <option value="tomato">Tomate</option>
+              <option value="potato">Pomme de terre</option>
+              <option value="corn">Maïs</option>
+              <option value="grape">Vigne</option>
+              <option value="apple">Pomme</option>
+              <option value="peach">Pêche</option>
+              <option value="pepper">Poivron</option>
+              <option value="strawberry">Fraise</option>
+              <option value="cherry">Cerise</option>
+            </select>
+            <div class="view-toggle">
+              <button
+                class="vt-btn active"
+                id="btnViewTable"
+                onclick="setView('table')"
+                title="Vue tableau"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                >
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                  <rect x="14" y="14" width="7" height="7" />
+                </svg>
+              </button>
+              <button
+                class="vt-btn"
+                id="btnViewGrid"
+                onclick="setView('grid')"
+                title="Vue grille"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.2"
+                >
+                  <line x1="8" y1="6" x2="21" y2="6" />
+                  <line x1="8" y1="12" x2="21" y2="12" />
+                  <line x1="8" y1="18" x2="21" y2="18" />
+                  <line x1="3" y1="6" x2="3.01" y2="6" />
+                  <line x1="3" y1="12" x2="3.01" y2="12" />
+                  <line x1="3" y1="18" x2="3.01" y2="18" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div id="analysesContent">
+            <div class="loading">
+              <div class="spinner"></div>
+              Chargement des analyses…
+            </div>
+          </div>
+          <div class="pagination" id="analysesPagination"></div>
+        </div>
+
+        <!-- ─────────────────────────────────────
+             PAGE: USERS (FARMERS)
+        ───────────────────────────────────── -->
+        <div class="page" id="page-users">
+          <div class="section-header">
+            <h2>Gestion des farmers 👥</h2>
+            <p>Liste complète des agriculteurs enregistrés sur la plateforme</p>
+          </div>
+
+          <div class="filter-bar">
+            <div class="search-input">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#4ade80"
+                stroke-width="2"
+                opacity=".5"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Nom, email, commune…"
+                id="usersSearch"
+                oninput="filterUsers()"
+              />
+            </div>
+            <select
+              class="filter-select"
+              id="usersStatusFilter"
+              onchange="filterUsers()"
+            >
+              <option value="">Tous les statuts</option>
+              <option value="1">Actif</option>
+              <option value="0">Inactif</option>
+            </select>
+            <div style="margin-left: auto">
+              <!-- no add farmer from admin -->
+            </div>
+          </div>
+
+          <div class="glass-card" style="padding: 0">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Utilisateur</th>
+                    <th>Email</th>
+                    <th>Commune</th>
+                    <th>Analyses</th>
+                    <th>Statut</th>
+                    <th>Inscription</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                  <tr>
+                    <td colspan="7">
+                      <div class="loading">
+                        <div class="spinner"></div>
+                        Chargement…
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─────────────────────────────────────
+             PAGE: ADMINS
+        ───────────────────────────────────── -->
+        <div class="page" id="page-admins">
+          <div class="section-header">
+            <h2>Admins & Experts 🛡️</h2>
+            <p>Gestion des comptes à accès élevé</p>
+          </div>
+
+          <div
+            style="
+              display: flex;
+              justify-content: flex-end;
+              margin-bottom: 18px;
+            "
+          >
+            <button class="btn btn-purple" onclick="openAddAdminModal()">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+              >
+                <circle cx="12" cy="8" r="4" />
+                <path d="M20 21a8 8 0 1 0-16 0" />
+                <line x1="19" y1="5" x2="19" y2="11" />
+                <line x1="16" y1="8" x2="22" y2="8" />
+              </svg>
+              Ajouter un admin
+            </button>
+          </div>
+
+          <div class="glass-card" style="padding: 0">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Utilisateur</th>
+                    <th>Email</th>
+                    <th>Rôle</th>
+                    <th>Commune</th>
+                    <th>Statut</th>
+                    <th>Inscription</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="adminsTableBody">
+                  <tr>
+                    <td colspan="7">
+                      <div class="loading">
+                        <div class="spinner"></div>
+                        Chargement…
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─────────────────────────────────────
+             PAGE: ALERTS
+        ───────────────────────────────────── -->
+        <div class="page" id="page-alerts">
+          <div class="section-header">
+            <h2>Alertes actives 🚨</h2>
+            <p>Alertes phytosanitaires en attente de résolution</p>
+          </div>
+
+          <div class="glass-card" style="padding: 0">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Maladie</th>
+                    <th>Commune</th>
+                    <th>Sévérité</th>
+                    <th>Priorité</th>
+                    <th>Message</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="alertsTableBody">
+                  <tr>
+                    <td colspan="7">
+                      <div class="loading">
+                        <div class="spinner"></div>
+                        Chargement…
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─────────────────────────────────────
+             PAGE: STATS
+        ───────────────────────────────────── -->
+        <div class="page" id="page-stats">
+          <div class="section-header">
+            <h2>Statistiques système 📈</h2>
+            <p>Métriques globales de la plateforme PhytoSentinel</p>
+          </div>
+          <div id="statsContent">
+            <div class="loading">
+              <div class="spinner"></div>
+              Chargement…
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <!-- end app-shell -->
+
+    <!-- ════════════════════════════════════════
+         MODALS
+    ════════════════════════════════════════ -->
+
+    <!-- Image preview -->
+    <div class="modal-overlay" id="imgModal" onclick="closeImgModal(event)">
+      <div
+        class="modal"
+        style="
+          max-width: 700px;
+          background: rgba(3, 11, 5, 0.98);
+          padding: 16px;
+        "
+      >
+        <button
+          class="modal-close"
+          onclick="document.getElementById('imgModal').classList.remove('open')"
+        >
+          ✕
+        </button>
+        <img
+          id="imgModalSrc"
+          src=""
+          alt="Analyse"
+          style="
+            width: 100%;
+            border-radius: 14px;
+            max-height: 75vh;
+            object-fit: contain;
+          "
+        />
+        <div
+          id="imgModalCaption"
+          style="
+            text-align: center;
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--t3);
+          "
+        ></div>
+      </div>
+    </div>
+
+    <!-- Analysis detail -->
+    <div
+      class="modal-overlay"
+      id="analysisDetailModal"
+      onclick="closeModalIfOverlay(event, 'analysisDetailModal')"
+    >
+      <div class="modal" style="max-width: 620px">
+        <button
+          class="modal-close"
+          onclick="
+            document
+              .getElementById('analysisDetailModal')
+              .classList.remove('open')
+          "
+        >
+          ✕
+        </button>
+        <h3>Détail de l'analyse</h3>
+        <div class="modal-sub" id="analysisDetailSub">—</div>
+        <div id="analysisDetailContent"></div>
+      </div>
+    </div>
+
+    <!-- Add Admin Modal -->
+    <div
+      class="modal-overlay"
+      id="addAdminModal"
+      onclick="closeModalIfOverlay(event, 'addAdminModal')"
+    >
+      <div class="modal">
+        <button
+          class="modal-close"
+          onclick="
+            document.getElementById('addAdminModal').classList.remove('open')
+          "
+        >
+          ✕
+        </button>
+        <h3>Ajouter un compte</h3>
+        <div class="modal-sub">
+          Créer un nouvel admin ou expert phytosanitaire
+        </div>
+        <div class="form-group">
+          <label class="form-label">NOM COMPLET</label>
+          <input
+            class="form-input"
+            id="newAdminName"
+            placeholder="Nom Prénom"
+          />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">NOM D'UTILISATEUR</label>
+            <input
+              class="form-input"
+              id="newAdminUsername"
+              placeholder="username"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">RÔLE</label>
+            <select class="form-input" id="newAdminRole">
+              <option value="admin">Admin</option>
+              <option value="expert">Expert</option>
+              <option value="technician">Technicien</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">EMAIL</label>
+          <input
+            class="form-input"
+            type="email"
+            id="newAdminEmail"
+            placeholder="email@example.dz"
+          />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">MOT DE PASSE</label>
+            <input
+              class="form-input"
+              type="password"
+              id="newAdminPassword"
+              placeholder="••••••••"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">COMMUNE</label>
+            <input
+              class="form-input"
+              id="newAdminCommune"
+              placeholder="Guelma"
+            />
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 8px">
+          <button
+            class="btn btn-primary"
+            style="flex: 1"
+            onclick="submitNewAdmin()"
+          >
+            Créer le compte
+          </button>
+          <button
+            class="btn btn-ghost"
+            onclick="
+              document.getElementById('addAdminModal').classList.remove('open')
+            "
+          >
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Delete User -->
+    <div
+      class="modal-overlay"
+      id="deleteUserModal"
+      onclick="closeModalIfOverlay(event, 'deleteUserModal')"
+    >
+      <div class="modal" style="max-width: 420px">
+        <button
+          class="modal-close"
+          onclick="
+            document.getElementById('deleteUserModal').classList.remove('open')
+          "
+        >
+          ✕
+        </button>
+        <h3 style="color: var(--red)">⚠️ Supprimer l'utilisateur</h3>
+        <div class="modal-sub">
+          Vous allez supprimer
+          <strong id="deleteUserName" style="color: var(--t1)">—</strong>.<br />
+          Cette action est irréversible. Les analyses resteront en base sans
+          propriétaire.
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 8px">
+          <button
+            class="btn btn-danger"
+            style="flex: 1"
+            onclick="confirmDeleteUser()"
+          >
+            Supprimer
+          </button>
+          <button
+            class="btn btn-ghost"
+            onclick="
+              document
+                .getElementById('deleteUserModal')
+                .classList.remove('open')
+            "
+          >
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PROMOTE USER MODAL ─────────────────────────────────────────── -->
+    <div
+      class="modal-overlay"
+      id="promoteModal"
+      onclick="closeModalIfOverlay(event, 'promoteModal')"
+    >
+      <div class="modal-box" style="max-width: 420px">
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title">⬆ Promouvoir l'utilisateur</h3>
+            <p
+              id="promoteUserName"
+              style="color: var(--tm); font-size: 13px; margin-top: 4px"
+            >
+              —
+            </p>
+          </div>
+          <button
+            class="modal-close"
+            onclick="
+              document.getElementById('promoteModal').classList.remove('open')
+            "
+          >
+            ✕
+          </button>
+        </div>
+        <div style="padding: 24px">
+          <p style="color: var(--t3); margin-bottom: 18px; font-size: 14px">
+            Choisissez le nouveau rôle à attribuer à cet utilisateur.
+          </p>
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <button
+              class="btn btn-primary"
+              style="justify-content: flex-start; gap: 12px; padding: 14px 18px"
+              onclick="confirmPromote('expert')"
+            >
+              <span style="font-size: 20px">🔬</span>
+              <span
+                ><strong>Expert Phytosanitaire</strong><br /><small
+                  style="opacity: 0.7; font-weight: 400"
+                  >Peut voir toutes les analyses et valider les résultats</small
+                ></span
+              >
+            </button>
+            <button
+              class="btn btn-primary"
+              style="
+                justify-content: flex-start;
+                gap: 12px;
+                padding: 14px 18px;
+                background: rgba(192, 132, 252, 0.12);
+                border-color: rgba(192, 132, 252, 0.3);
+                color: var(--purple);
+              "
+              onclick="confirmPromote('admin')"
+            >
+              <span style="font-size: 20px">🛡️</span>
+              <span
+                ><strong>Administrateur</strong><br /><small
+                  style="opacity: 0.7; font-weight: 400"
+                  >Accès complet à toutes les fonctionnalités</small
+                ></span
+              >
+            </button>
+            <button
+              class="btn btn-primary"
+              style="
+                justify-content: flex-start;
+                gap: 12px;
+                padding: 14px 18px;
+                background: rgba(74, 222, 128, 0.08);
+                border-color: rgba(74, 222, 128, 0.2);
+                color: var(--green);
+              "
+              onclick="confirmPromote('farmer')"
+            >
+              <span style="font-size: 20px">👨‍🌾</span>
+              <span
+                ><strong>Farmer (rétrograder)</strong><br /><small
+                  style="opacity: 0.7; font-weight: 400"
+                  >Remettre l'utilisateur au rôle de base</small
+                ></span
+              >
+            </button>
+          </div>
+          <button
+            class="btn btn-ghost"
+            style="width: 100%; margin-top: 14px"
+            onclick="
+              document.getElementById('promoteModal').classList.remove('open')
+            "
+          >
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ════════════════════════════════════════
+         JAVASCRIPT
+    ════════════════════════════════════════ -->
+    <script>
+      // ─────────────────────────────────────────────────────────────────
+      // CONFIG
+      // ─────────────────────────────────────────────────────────────────
+      const API = "http://localhost:5000";
+      const PAGE_SIZE = 12;
+
+      let currentView = "table"; // default: table view
+      let allAnalyses = [];
+      let filteredAnalyses = [];
+      let allUsers = [];
+      let filteredUsers = [];
+      let analysesPage = 1;
+      let pendingDeleteUserId = null;
+      let currentPage = "dashboard";
+      let _isRedirecting = false; // ← évite les redirections multiples simultanées
+
+      // ─────────────────────────────────────────────────────────────────
+      // AUTH
+      // ─────────────────────────────────────────────────────────────────
+      function getToken() {
+        return sessionStorage.getItem("phyto_token");
+      }
+      function getUser() {
+        try {
+          return JSON.parse(sessionStorage.getItem("phyto_user") || "null");
+        } catch {
+          return null;
+        }
+      }
+
+      function authHeaders() {
+        return {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        };
+      }
+
+      async function checkAuth() {
+        const user = getUser();
+        const token = getToken();
+        if (!user || !token) {
+          redirectLogin();
+          return;
+        }
+        if (user.role !== "admin") {
+          showToast("Accès refusé : rôle admin requis", "error");
+          setTimeout(redirectLogin, 1500);
+          return;
+        }
+        document.getElementById("sidebarAdminName").textContent =
+          user.full_name || user.username || "Administrateur";
+
+        // Vérifie uniquement le token via /verify — si 401 ici, la session est réellement expirée
+        try {
+          const r = await fetch(`${API}/api/auth/verify`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (r.status === 401) {
+            redirectLogin();
+            return;
+          }
+          // 200 ou autre code → continuer (le token est valide)
+        } catch {
+          /* serveur hors ligne — continuer en mode dégradé */
+        }
+      }
+
+      function redirectLogin() {
+        if (_isRedirecting) return; // ← bloque les appels multiples
+        _isRedirecting = true;
+        sessionStorage.removeItem("phyto_token");
+        sessionStorage.removeItem("phyto_user");
+        window.location.href = "login.html";
+      }
+
+      function doLogout() {
+        sessionStorage.removeItem("phyto_token");
+        sessionStorage.removeItem("phyto_user");
+        window.location.href = "login.html";
+      }
+
+      // ─────────────────────────────────────────────────────────────────
+      // NAVIGATION
+      // ─────────────────────────────────────────────────────────────────
+      const PAGE_TITLES = {
+        dashboard: "Tableau de bord",
+        analyses: "Analyses partagées",
+        users: "Gestion des farmers",
+        admins: "Admins & Experts",
+        alerts: "Alertes actives",
+        stats: "Statistiques",
+      };
+
+      function navigate(page) {
+        document
+          .querySelectorAll(".page")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((i) => i.classList.remove("active"));
+
+        const el = document.getElementById(`page-${page}`);
+        if (el) el.classList.add("active");
+
+        document.querySelectorAll(".nav-item").forEach((i) => {
+          if (i.getAttribute("onclick")?.includes(`'${page}'`))
+            i.classList.add("active");
+        });
+
+        document.getElementById("topbarTitle").textContent =
+          PAGE_TITLES[page] || page;
+        currentPage = page;
+
+        if (page === "dashboard") loadDashboard();
+        else if (page === "analyses") loadAnalyses();
+        else if (page === "users") loadUsers();
+        else if (page === "admins") loadAdmins();
+        else if (page === "alerts") loadAlerts();
+        else if (page === "stats") loadStats();
+      }
+
+      function refreshCurrentPage() {
+        navigate(currentPage);
+      }
+
+      // ─────────────────────────────────────────────────────────────────
+      // SIDEBAR
+      // ─────────────────────────────────────────────────────────────────
+      function toggleSidebar() {
+        const sb = document.getElementById("sidebar");
+        const main = document.getElementById("main");
+        const btn = document.getElementById("collapseBtn");
+        const collapsed = sb.classList.toggle("collapsed");
+        main.classList.toggle("expanded", collapsed);
+        btn.style.transform = collapsed ? "rotate(180deg)" : "";
+      }
+
+      // ─────────────────────────────────────────────────────────────────
+      // TOAST
+      // ─────────────────────────────────────────────────────────────────
+      function showToast(msg, type = "info") {
+        const icons = { success: "✅", error: "❌", info: "ℹ️", warning: "⚠️" };
+        const t = document.createElement("div");
+        t.className = `toast ${type}`;
+        t.innerHTML = `<span>${icons[type] || "📢"}</span><span>${msg}</span>`;
+        document.getElementById("toastContainer").appendChild(t);
+        setTimeout(() => t.remove(), 4000);
+      }
+
+      // ─────────────────────────────────────────────────────────────────
+      // HELPERS
+      // ─────────────────────────────────────────────────────────────────
+      function severityBadge(s) {
+        const map = {
+          critical: "badge-red",
+          high: "badge-amber",
+          moderate: "badge-blue",
+          low: "badge-green",
+        };
+        const labels = {
+          critical: "Critique",
+          high: "Élevée",
+          moderate: "Modérée",
+          low: "Faible",
+          healthy: "Saine",
+        };
+        const cls = map[s] || "badge-teal";
+        return `<span class="badge ${cls}">${labels[s] || s || "—"}</span>`;
+      }
+
+      function roleBadge(r) {
+        const map = {
+          admin: "badge-purple",
+          expert: "badge-teal",
+          technician: "badge-blue",
+          farmer: "badge-green",
+        };
+        const lbl = {
+          admin: "Admin",
+          expert: "Expert",
+          technician: "Technicien",
+          farmer: "Farmer",
+        };
+        return `<span class="badge ${map[r] || "badge-green"}">${lbl[r] || r}</span>`;
+      }
+
+      function confPct(c) {
+        return Math.round((c || 0) * 100);
+      }
+
+      function fmtDate(d) {
+        if (!d) return "—";
+        try {
+          return new Date(d).toLocaleDateString("fr-FR", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          });
+        } catch {
+          return d;
+        }
+      }
+
+      function imgUrl(a) {
+        if (a.image_stored_name) return `${API}/uploads/${a.image_stored_name}`;
+        if (a.image_path) return `${API}/${a.image_path}`;
+        return null;
+      }
+
+      // ─────────────────────────────────────────────────────────────────
+      // API CALLS
+      // ─────────────────────────────────────────────────────────────────
+      async function apiFetch(path, opts = {}) {
+        if (_isRedirecting) throw new Error("redirecting");
+        const res = await fetch(`${API}${path}`, {
+          ...opts,
+          headers: { ...authHeaders(), ...(opts.headers || {}) },
+        });
+        if (res.status === 401) {
+          // Ne redirige que si le token /verify lui-même est rejeté
+          // Pour les endpoints protégés, on laisse l'appelant gérer le 401
+          throw Object.assign(new Error("401"), { status: 401 });
+        }
+        return res;
+      }
+
+      // ─────────────────────────────────────────────────────────────────
+      // DASHBOARD
+      // ─────────────────────────────────────────────────────────────────
+      async function loadDashboard() {
+        try {
+          // Chaque requête séparément pour éviter qu'un 401 sur /admin/analyses
+          // ne bloque les autres données ou ne déclenche une redirection
+          let stats = {},
+            analyses = [],
+            alertsAll = [];
+
+          try {
+            const statsRes = await apiFetch("/api/statistics");
+            stats = await statsRes.json();
+          } catch (e) {
+            if (e.message === "redirecting") return;
+          }
+
+          try {
+            const analysesRes = await apiFetch("/api/admin/analyses?limit=200");
+            const anData = await analysesRes.json();
+            analyses = (anData.analyses || []).filter(
+              (a) => a.shared_with_admin,
+            );
+          } catch (e) {
+            if (e.message === "redirecting") return;
+            if (e.status === 401) {
+              // Problème de permission backend sur cet endpoint spécifique,
+              // pas une session expirée — afficher un message sans rediriger
+              document.getElementById("dashRecentTable").innerHTML =
+                `<div class="empty-state"><div class="icon">⚠️</div><h3>Accès refusé à /api/admin/analyses</h3><p>Vérifiez les permissions backend pour le rôle admin.</p></div>`;
+            }
+          }
+
+          try {
+            const alertsRes = await apiFetch(
+              "/api/alerts?active_only=true&limit=500",
+            );
+            const alData = await alertsRes.json();
+            alertsAll = alData.alerts || [];
+          } catch (e) {
+            if (e.message === "redirecting") return;
+          }
+
+          document.getElementById("dStatAnalyses").textContent =
+            analyses.length;
+          document.getElementById("dStatUsers").textContent =
+            stats.total_users || "—";
+          document.getElementById("dStatAlerts").textContent = alertsAll.filter(
+            (a) => a.status === "active",
+          ).length;
+
+          const diseases = new Set(
+            analyses.map((a) => a.disease_name).filter(Boolean),
+          );
+          document.getElementById("dStatDiseases").textContent = diseases.size;
+
+          document.getElementById("sidebarBadgeAnalyses").textContent =
+            analyses.length;
+          document.getElementById("sidebarBadgeAlerts").textContent =
+            alertsAll.filter((a) => a.status === "active").length;
+
+          const recent = [...analyses]
+            .sort(
+              (a, b) => new Date(b.analysis_date) - new Date(a.analysis_date),
+            )
+            .slice(0, 8);
+          renderRecentTable(recent);
+        } catch (e) {
+          if (e.message !== "401" && e.message !== "redirecting")
+            showToast("Erreur chargement dashboard", "error");
+        }
+      }
+
+      function renderRecentTable(list) {
+        const wrap = document.getElementById("dashRecentTable");
+        if (!list.length) {
+          wrap.innerHTML = `<div class="empty-state"><div class="icon">🔬</div><h3>Aucune analyse partagée</h3><p>Les farmers doivent cliquer sur "Envoyer à l'admin"</p></div>`;
+          return;
+        }
+        const rows = list
+          .map((a) => {
+            const url = imgUrl(a);
+            return `<tr>
+          <td>${url ? `<img class="td-img" src="${url}" alt="" onclick="openImgModal('${url}','${(a.disease_name || "").replace(/'/g, "\\'")}')">` : '<span style="font-size:28px">🌿</span>'}</td>
+          <td><div style="font-weight:600;color:var(--t1)">${a.disease_name || "—"}</div><div style="font-size:11px;color:var(--tm)">${a.plant_type || ""}</div></td>
+          <td>${severityBadge(a.is_healthy ? "healthy" : a.severity)}</td>
+          <td><span style="font-weight:700;color:var(--green)">${confPct(a.confidence)}%</span></td>
+          <td style="color:var(--t3)">${a.user_full_name || a.user_username || "—"}</td>
+          <td style="color:var(--t3)">${a.commune || "—"}</td>
+          <td style="color:var(--tm);font-size:12px">${fmtDate(a.analysis_date)}</td>
+        </tr>`;
+          })
+          .join("");
+        wrap.innerHTML = `<div class="table-wrap"><table>
+        <thead><tr><th>Image</th><th>Maladie</th><th>Sévérité</th><th>Confiance</th><th>Farmer</th><th>Commune</th><th>Date</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+      }
+
+      // ─────────────────────────────────────────────────────────────────
+      // ANALYSES
+      // ─────────────────────────────────────────────────────────────────
+      async function loadAnalyses() {
+        document.getElementById("analysesContent").innerHTML =
+          `<div class="loading"><div class="spinner"></div> Chargement…</div>`;
+        try {
+          const res = await apiFetch("/api/admin/analyses?limit=500");
+          const data = await res.json();
+          allAnalyses = data.analyses || [];
+          filteredAnalyses = [...allAnalyses];
+          analysesPage = 1;
+          renderAnalyses();
+        } catch (e) {
+          if (e.message !== "401")
+            document.getElementById("analysesContent").innerHTML =
+              `<div class="empty-state"><div class="icon">❌</div><h3>Erreur de chargement</h3></div>`;
+        }
+      }
+
+      function filterAnalyses() {
+        const q = document.getElementById("analysesSearch").value.toLowerCase();
+        const sev = document.getElementById("analysesSeverity").value;
+        const pl = document.getElementById("analysesPlant").value;
+        filteredAnalyses = allAnalyses.filter((a) => {
+          const matchQ =
+            !q ||
+            [
+              a.disease_name,
+              a.commune,
+              a.user_full_name,
+              a.user_username,
+              a.plant_type,
+            ].some((v) => (v || "").toLowerCase().includes(q));
+          const matchSev = !sev || a.severity === sev;
+          const matchPl = !pl || a.plant_type === pl;
+          return matchQ && matchSev && matchPl;
+        });
+        analysesPage = 1;
+        renderAnalyses();
+      }
+
+      function setView(v) {
+        currentView = v;
+        document
+          .getElementById("btnViewTable")
+          .classList.toggle("active", v === "table");
+        document
+          .getElementById("btnViewGrid")
+          .classList.toggle("active", v === "grid");
+        renderAnalyses();
+      }
+
+      function renderAnalyses() {
+        const start = (analysesPage - 1) * PAGE_SIZE;
+        const paged = filteredAnalyses.slice(start, start + PAGE_SIZE);
+        const wrap = document.getElementById("analysesContent");
+
+        if (!filteredAnalyses.length) {
+          wrap.innerHTML = `<div class="empty-state"><div class="icon">🔬</div><h3>Aucune analyse partagée</h3><p>Résultat : 0 analyse correspond aux critères.</p></div>`;
+          document.getElementById("analysesPagination").innerHTML = "";
+          return;
+        }
+
+        if (currentView === "grid") {
+          wrap.innerHTML = `<div class="analyses-grid">${paged.map(renderAnalysisCard).join("")}</div>`;
+        } else {
+          wrap.innerHTML = renderAnalysesTable(paged);
+        }
+
+        renderPagination();
+      }
+
+      function renderAnalysisCard(a) {
+        const url = imgUrl(a);
+        const pct = confPct(a.confidence);
+        return `<div class="analysis-card" onclick="openAnalysisDetail(${a.id})">
+        <div class="card-img">
+          ${url ? `<img src="${url}" alt="analyse" onclick="event.stopPropagation();openImgModal('${url}','${(a.disease_name || "").replace(/'/g, "\\'")}')">` : "🌿"}
+        </div>
+        <div class="card-body">
+          <div class="card-disease">${a.disease_name || "Inconnu"}</div>
+          <div class="card-meta">
+            <span>🌱 ${a.plant_type || "—"} &nbsp;|&nbsp; ${severityBadge(a.is_healthy ? "healthy" : a.severity)}</span>
+            <span>👤 ${a.user_full_name || a.user_username || "—"}</span>
+            <span>📍 ${a.commune || "—"} &nbsp;|&nbsp; 📅 ${fmtDate(a.analysis_date)}</span>
+          </div>
+          <div class="confidence-bar" style="margin-top:10px">
+            <div class="confidence-fill" style="width:${pct}%"></div>
+          </div>
+          <div style="font-size:11px;color:var(--tm);margin-top:4px">Confiance : ${pct}%</div>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openAnalysisDetail(${a.id})">Détails</button>
+          <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteAnalysis(${a.id})">Supprimer</button>
+        </div>
+      </div>`;
+      }
+
+      function renderAnalysesTable(list) {
+        // Summary stats bar
+        const totalShared = list.length;
+        const healthyCount = list.filter((a) => a.is_healthy).length;
+        const diseaseCount = totalShared - healthyCount;
+        const uniqueFarmers = new Set(
+          list.map((a) => a.user_id || a.user_username).filter(Boolean),
+        ).size;
+        const criticalCount = list.filter(
+          (a) => a.severity === "critical",
+        ).length;
+
+        const summaryBar = `<div class="analyses-summary-bar">
+          <div class="sum-item">📊 <span class="sum-val">${totalShared}</span> analyses partagées</div>
+          <div class="sum-item">👤 <span class="sum-val">${uniqueFarmers}</span> agriculteur${uniqueFarmers > 1 ? "s" : ""}</div>
+          <div class="sum-item">🦠 <span class="sum-val">${diseaseCount}</span> malades</div>
+          <div class="sum-item">✅ <span class="sum-val">${healthyCount}</span> sains</div>
+          ${criticalCount > 0 ? `<div class="sum-item">🚨 <span class="sum-val" style="color:var(--red)">${criticalCount}</span> critiques</div>` : ""}
+        </div>`;
+
+        const rows = list
+          .map((a) => {
+            const url = imgUrl(a);
+            const pct = confPct(a.confidence);
+            const farmerDisplay = a.user_full_name || a.user_username || "—";
+            const farmerSub =
+              a.user_full_name && a.user_username ? `@${a.user_username}` : "";
+            const commune = a.commune || "—";
+
+            const imgCell = url
+              ? `<img class="td-img-lg" src="${url}" alt="plante analysée"
+                onclick="event.stopPropagation();openImgModal('${url}','${(a.disease_name || "").replace(/'/g, "\\'")}')"
+                title="Voir l'image en grand">`
+              : `<div class="td-img-placeholder">🌿</div>`;
+
+            // Confidence color
+            const confColor =
+              pct >= 85
+                ? "var(--green)"
+                : pct >= 60
+                  ? "var(--amber)"
+                  : "var(--red)";
+
+            return `<tr onclick="openAnalysisDetail(${a.id})" style="cursor:pointer">
+            <td>${imgCell}</td>
+            <td>
+              <div class="farmer-cell">
+                <span class="farmer-name">👤 ${farmerDisplay}</span>
+                ${farmerSub ? `<span class="farmer-username">${farmerSub}</span>` : ""}
+                <span class="farmer-commune">📍 ${commune}</span>
+              </div>
+            </td>
+            <td>
+              <div class="disease-cell">
+                <span class="disease-name">${a.disease_name || "—"}</span>
+                ${a.scientific_name ? `<span class="disease-scientific">${a.scientific_name}</span>` : ""}
+                <span class="disease-plant">🌱 ${a.plant_type ? a.plant_type.charAt(0).toUpperCase() + a.plant_type.slice(1) : "—"}</span>
+              </div>
+            </td>
+            <td>${severityBadge(a.is_healthy ? "healthy" : a.severity)}</td>
+            <td>
+              <div class="conf-cell">
+                <span class="conf-val" style="color:${confColor}">${pct}%</span>
+                <div class="mini-conf-bar">
+                  <div class="mini-conf-fill" style="width:${pct}%;background:${pct >= 85 ? "linear-gradient(90deg,var(--green-mid),var(--lime))" : pct >= 60 ? "linear-gradient(90deg,var(--amber),#f59e0b)" : "linear-gradient(90deg,var(--red),#f97316)"}"></div>
+                </div>
+              </div>
+            </td>
+            <td class="analysis-date-cell">${fmtDate(a.analysis_date)}</td>
+            <td onclick="event.stopPropagation()">
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <button class="btn-detail" onclick="openAnalysisDetail(${a.id})">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                  Voir détails
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="deleteAnalysis(${a.id})" style="font-size:11px;padding:5px 10px">✕ Supprimer</button>
+              </div>
+            </td>
+          </tr>`;
+          })
+          .join("");
+
+        return `<div class="glass-card" style="padding:0">
+          ${summaryBar}
+          <div class="table-wrap"><table>
+            <thead><tr>
+              <th style="width:80px">Image</th>
+              <th>Agriculteur</th>
+              <th>Analyse</th>
+              <th>Sévérité</th>
+              <th>Confiance IA</th>
+              <th>Date</th>
+              <th style="width:120px">Actions</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table></div>
+        </div>`;
+      }
+
+      function renderPagination() {
+        const total = Math.ceil(filteredAnalyses.length / PAGE_SIZE);
+        const wrap = document.getElementById("analysesPagination");
+        if (total <= 1) {
+          wrap.innerHTML = "";
+          return;
+        }
+
+        let html = `<button class="pg-btn" onclick="changePage(${analysesPage - 1})" ${analysesPage === 1 ? "disabled" : ""}>&lsaquo;</button>`;
+        for (let i = 1; i <= total; i++) {
+          if (i === 1 || i === total || Math.abs(i - analysesPage) <= 1) {
+            html += `<button class="pg-btn${i === analysesPage ? " active" : ""}" onclick="changePage(${i})">${i}</button>`;
+          } else if (Math.abs(i - analysesPage) === 2) {
+            html += `<span style="color:var(--tm);padding:0 4px">…</span>`;
+          }
+        }
+        html += `<button class="pg-btn" onclick="changePage(${analysesPage + 1})" ${analysesPage === total ? "disabled" : ""}>&rsaquo;</button>`;
+        html += `<span style="color:var(--tm);font-size:12px;margin-left:8px">${filteredAnalyses.length} résultats</span>`;
+        wrap.innerHTML = html;
+      }
+
+      function changePage(p) {
+        const total = Math.ceil(filteredAnalyses.length / PAGE_SIZE);
+        if (p < 1 || p > total) return;
+        analysesPage = p;
+        renderAnalyses();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      async function openAnalysisDetail(id) {
+        document.getElementById("analysisDetailModal").classList.add("open");
+        document.getElementById("analysisDetailContent").innerHTML =
+          `<div class="loading"><div class="spinner"></div></div>`;
+        try {
+          const res = await apiFetch(`/api/analyses/${id}`);
+          const a = await res.json();
+          document.getElementById("analysisDetailSub").textContent =
+            `ID #${a.id} — ${fmtDate(a.analysis_date)}`;
+          const url = imgUrl(a);
+          const pct = confPct(a.confidence);
+          const sev = a.is_healthy ? "healthy" : a.severity || "moderate";
+          const sevLabels = {
+            healthy: "Saine",
+            low: "Faible",
+            moderate: "Modérée",
+            high: "Élevée",
+            critical: "Critique",
+          };
+          const confColor =
+            pct >= 85
+              ? "var(--green)"
+              : pct >= 60
+                ? "var(--amber)"
+                : "var(--red)";
+
+          document.getElementById("analysisDetailContent").innerHTML = `
+            <!-- ── IMAGE ── -->
+            ${
+              url
+                ? `<div style="position:relative;margin-bottom:20px;">
+                  <img src="${url}"
+                    alt="plante analysée"
+                    style="width:100%;border-radius:14px;max-height:280px;object-fit:cover;cursor:pointer;display:block;border:1.5px solid rgba(74,222,128,0.18);"
+                    onclick="openImgModal('${url}','${(a.disease_name || "").replace(/'/g, "\\'")}')"
+                    onerror="this.parentElement.innerHTML='<div style=\\'width:100%;height:160px;border-radius:14px;background:rgba(74,222,128,0.06);border:1.5px dashed rgba(74,222,128,0.2);display:flex;align-items:center;justify-content:center;font-size:48px;margin-bottom:20px;\\'>🌿</div>'"
+                  >
+                  <span style="position:absolute;bottom:10px;right:10px;background:rgba(3,11,5,0.75);backdrop-filter:blur(6px);padding:4px 10px;border-radius:8px;font-size:11px;color:var(--t3);">🔍 Cliquer pour agrandir</span>
+                </div>`
+                : `<div style="width:100%;height:140px;border-radius:14px;background:rgba(74,222,128,0.06);border:1.5px dashed rgba(74,222,128,0.2);display:flex;align-items:center;justify-content:center;font-size:52px;margin-bottom:20px;">🌿</div>`
+            }
+
+            <!-- ── BADGES ROW ── -->
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
+              ${severityBadge(sev)}
+              <span class="badge badge-teal">Confiance : ${pct}%</span>
+              <span class="badge badge-blue">🌱 ${a.plant_type ? a.plant_type.charAt(0).toUpperCase() + a.plant_type.slice(1) : "—"}</span>
+              ${a.commune ? `<span class="badge badge-green">📍 ${a.commune}</span>` : ""}
+              ${a.is_healthy ? `<span class="badge badge-green">✅ Plante saine</span>` : ""}
+            </div>
+
+            <!-- ── INFO KV ── -->
+            <div class="detail-kv">
+              <div class="detail-row"><span class="dk">🦠 Maladie</span><span class="dv" style="font-weight:700;color:var(--t1)">${a.disease_name || "—"}</span></div>
+              ${a.scientific_name ? `<div class="detail-row"><span class="dk">🔬 Nom scientifique</span><span class="dv" style="font-style:italic;color:var(--tm)">${a.scientific_name}</span></div>` : ""}
+              <div class="detail-row"><span class="dk">👤 Agriculteur</span><span class="dv">${a.user_full_name || a.user_username || "—"}${a.user_username && a.user_full_name ? `<span style="font-size:11px;color:var(--purple);margin-left:6px;">@${a.user_username}</span>` : ""}</span></div>
+              <div class="detail-row"><span class="dk">📍 Commune</span><span class="dv">${a.commune || "—"}</span></div>
+              ${a.perimetre ? `<div class="detail-row"><span class="dk">📐 Périmètre</span><span class="dv">${a.perimetre}</span></div>` : ""}
+              <div class="detail-row"><span class="dk">🎯 Confiance IA</span>
+                <span class="dv">
+                  <span style="font-weight:700;color:${confColor}">${pct}%</span>
+                  <div class="mini-conf-bar" style="margin-top:5px;width:120px;">
+                    <div class="mini-conf-fill" style="width:${pct}%;background:${pct >= 85 ? "linear-gradient(90deg,var(--green-mid),var(--lime))" : pct >= 60 ? "linear-gradient(90deg,var(--amber),#f59e0b)" : "linear-gradient(90deg,var(--red),#f97316)"}"></div>
+                  </div>
+                </span>
+              </div>
+              <div class="detail-row"><span class="dk">🗓️ Date d'analyse</span><span class="dv" style="color:var(--tm)">${fmtDate(a.analysis_date)}</span></div>
+              <div class="detail-row"><span class="dk">📤 Partagée admin</span><span class="dv">${a.shared_with_admin ? "✅ Oui" : "❌ Non"}</span></div>
+            </div>
+
+            <!-- ── DIAGNOSIS DESCRIPTION ── -->
+            ${
+              a.diagnosis_description || a.analysis_notes || a.description
+                ? `<div style="margin-top:16px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(74,222,128,0.1);border-radius:12px;">
+                  <div style="font-size:12px;font-weight:700;color:var(--tm);letter-spacing:0.5px;margin-bottom:8px;">📋 DESCRIPTION DU DIAGNOSTIC</div>
+                  <div style="font-size:13px;color:var(--t3);line-height:1.75;">${a.diagnosis_description || a.analysis_notes || a.description}</div>
+                </div>`
+                : ""
+            }
+
+            <!-- ── TREATMENT STEPS ── -->
+            ${
+              a.treatment_steps && a.treatment_steps.length
+                ? `<div style="margin-top:14px;background:rgba(74,222,128,0.05);border:1px solid rgba(74,222,128,0.14);border-radius:12px;padding:14px;">
+                  <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:12px;">💊 Traitement recommandé</div>
+                  ${a.treatment_steps
+                    .map(
+                      (s, i) => `
+                    <div style="display:flex;gap:10px;margin-bottom:9px;align-items:flex-start;">
+                      <div style="width:22px;height:22px;background:rgba(74,222,128,0.12);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--green);flex-shrink:0;">${i + 1}</div>
+                      <div style="font-size:13px;color:var(--t3);line-height:1.6;">${s}</div>
+                    </div>`,
+                    )
+                    .join("")}
+                </div>`
+                : ""
+            }
+          `;
+        } catch (e) {
+          document.getElementById("analysisDetailContent").innerHTML =
+            `<div class="empty-state"><div class="icon">❌</div><h3>Erreur de chargement</h3></div>`;
+        }
+      }
+
+      async function deleteAnalysis(id) {
+        if (!confirm("Supprimer cette analyse ?")) return;
+        try {
+          const res = await apiFetch(`/api/analyses/${id}`, {
+            method: "DELETE",
+          });
+          if (res.ok) {
+            showToast("Analyse supprimée", "success");
+            loadAnalyses();
+          } else {
+            showToast("Échec de la suppression", "error");
+          }
+        } catch {
+          showToast("Erreur réseau", "error");
+        }
+      }
+
+      // ─────────────────────────────────────────────────────────────────
+      // USERS
+      // ─────────────────────────────────────────────────────────────────
+      async function loadUsers() {
+        document.getElementById("usersTableBody").innerHTML =
+          `<tr><td colspan="7"><div class="loading"><div class="spinner"></div> Chargement…</div></td></tr>`;
+        try {
+          const [usersRes, analysesRes] = await Promise.all([
+            apiFetch("/api/users"),
+            apiFetch("/api/analyses?limit=1000"),
+          ]);
+          if (!usersRes.ok) throw new Error("users fetch failed");
+
+          const data = await usersRes.json();
+          const anData = await analysesRes.json();
+          const anByUser = {};
+          (anData.analyses || []).forEach((a) => {
+            if (a.user_id) anByUser[a.user_id] = (anByUser[a.user_id] || 0) + 1;
+          });
+
+          allUsers = (data.users || []).filter((u) => u.role === "farmer");
+          allUsers.forEach((u) => (u._analysesCount = anByUser[u.id] || 0));
+          filteredUsers = [...allUsers];
+          renderUsers();
+        } catch (e) {
+          document.getElementById("usersTableBody").innerHTML =
+            `<tr><td colspan="7"><div class="empty-state"><div class="icon">❌</div><h3>Erreur de chargement</h3><p>Vérifiez que la route /api/users est exposée.</p></div></td></tr>`;
+        }
+      }
+
+      function filterUsers() {
+        const q = document.getElementById("usersSearch").value.toLowerCase();
+        const st = document.getElementById("usersStatusFilter").value;
+        filteredUsers = allUsers.filter((u) => {
+          const matchQ =
+            !q ||
+            [u.full_name, u.username, u.email, u.commune].some((v) =>
+              (v || "").toLowerCase().includes(q),
+            );
+          const matchSt = st === "" || String(u.is_active) === st;
+          return matchQ && matchSt;
+        });
+        renderUsers();
+      }
+
+      function renderUsers() {
+        const tbody = document.getElementById("usersTableBody");
+        if (!filteredUsers.length) {
+          tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="icon">👥</div><h3>Aucun farmer trouvé</h3></div></td></tr>`;
+          return;
+        }
+        tbody.innerHTML = filteredUsers
+          .map(
+            (u) => `
+        <tr>
+          <td><div style="display:flex;align-items:center;gap:10px">
+            <div class="user-row-avatar">👨‍🌾</div>
+            <div><div style="font-weight:600;color:var(--t1)">${u.full_name || u.username}</div><div style="font-size:11px;color:var(--tm)">@${u.username}</div></div>
+          </div></td>
+          <td style="color:var(--t3)">${u.email || "—"}</td>
+          <td style="color:var(--t3)">${u.commune || "—"}</td>
+          <td><span style="font-weight:700;color:var(--green)">${u._analysesCount}</span></td>
+          <td>${u.is_active ? '<span class="badge badge-green">Actif</span>' : '<span class="badge badge-red">Inactif</span>'}</td>
+          <td style="color:var(--tm);font-size:12px">${fmtDate(u.created_at)}</td>
+          <td><div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm" onclick="toggleUserActive(${u.id},${u.is_active})" title="${u.is_active ? "Désactiver" : "Activer"}">
+              ${u.is_active ? "🔒" : "✅"}
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="openPromoteModal(${u.id},'${(u.full_name || u.username).replace(/'/g, "\\'")}')" title="Promouvoir admin/expert">⬆</button>
+            <button class="btn btn-danger btn-sm" onclick="openDeleteUserModal(${u.id},'${(u.full_name || u.username).replace(/'/g, "\\'")}')">🗑️</button>
+          </div></td>
+        </tr>
+      `,
+          )
+          .join("");
+      }
+
+      async function toggleUserActive(userId, currentStatus) {
+        try {
+          const res = await apiFetch(`/api/users/${userId}`, {
+            method: "PUT",
+            body: JSON.stringify({ is_active: currentStatus ? 0 : 1 }),
+          });
+          if (res.ok) {
+            showToast(
+              currentStatus ? "Compte désactivé" : "Compte activé",
+              "success",
+            );
+            loadUsers();
+          } else {
+            showToast("Échec de la mise à jour", "error");
+          }
+        } catch {
+          showToast("Erreur réseau", "error");
+        }
+      }
+
+      function openDeleteUserModal(id, name) {
+        pendingDeleteUserId = id;
+        document.getElementById("deleteUserName").textContent = name;
+        document.getElementById("deleteUserModal").classList.add("open");
+      }
+
+      async function confirmDeleteUser() {
+        if (!pendingDeleteUserId) return;
+        try {
+          const res = await apiFetch(`/api/users/${pendingDeleteUserId}`, {
+            method: "DELETE",
+          });
+          document.getElementById("deleteUserModal").classList.remove("open");
+          if (res.ok) {
+            showToast("Utilisateur supprimé", "success");
+            loadUsers();
+          } else {
+            const d = await res.json();
+            showToast(d.error || "Échec", "error");
+          }
+        } catch {
+          showToast("Erreur réseau", "error");
+        }
+        pendingDeleteUserId = null;
+      }
+
+      // ─────────────────────────────────────────────────────────────────
+      // ADMINS
+      // ─────────────────────────────────────────────────────────────────
+      async function loadAdmins() {
+        document.getElementById("adminsTableBody").innerHTML =
+          `<tr><td colspan="7"><div class="loading"><div class="spinner"></div> Chargement…</div></td></tr>`;
+        try {
+          const res = await apiFetch("/api/users");
+          if (!res.ok) throw new Error();
+          const data = await res.json();
+          const admins = (data.users || []).filter((u) =>
+            ["admin", "expert", "technician"].includes(u.role),
+          );
+          renderAdmins(admins);
+        } catch {
+          document.getElementById("adminsTableBody").innerHTML =
+            `<tr><td colspan="7"><div class="empty-state"><div class="icon">🛡️</div><h3>Erreur de chargement</h3></div></td></tr>`;
+        }
+      }
+
+      function renderAdmins(list) {
+        const tbody = document.getElementById("adminsTableBody");
+        if (!list.length) {
+          tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="icon">🛡️</div><h3>Aucun admin trouvé</h3></div></td></tr>`;
+          return;
+        }
+        const me = getUser();
+        tbody.innerHTML = list
+          .map(
+            (u) => `
+        <tr>
+          <td><div style="display:flex;align-items:center;gap:10px">
+            <div class="user-row-avatar">🛡️</div>
+            <div><div style="font-weight:600;color:var(--t1)">${u.full_name || u.username}</div><div style="font-size:11px;color:var(--tm)">@${u.username}</div></div>
+          </div></td>
+          <td style="color:var(--t3)">${u.email || "—"}</td>
+          <td>${roleBadge(u.role)}</td>
+          <td style="color:var(--t3)">${u.commune || "—"}</td>
+          <td>${u.is_active ? '<span class="badge badge-green">Actif</span>' : '<span class="badge badge-red">Inactif</span>'}</td>
+          <td style="color:var(--tm);font-size:12px">${fmtDate(u.created_at)}</td>
+          <td><div style="display:flex;gap:6px">
+            ${me && me.id !== u.id ? `<button class="btn btn-danger btn-sm" onclick="openDeleteUserModal(${u.id},'${(u.full_name || u.username).replace(/'/g, "\\'")}')">🗑️</button>` : '<span style="color:var(--tm);font-size:12px">Vous</span>'}
+          </div></td>
+        </tr>
+      `,
+          )
+          .join("");
+      }
+
+      function openAddAdminModal() {
+        [
+          "newAdminName",
+          "newAdminUsername",
+          "newAdminEmail",
+          "newAdminPassword",
+          "newAdminCommune",
+        ].forEach((id) => {
+          document.getElementById(id).value = "";
+        });
+        document.getElementById("newAdminRole").value = "admin";
+        document.getElementById("addAdminModal").classList.add("open");
+      }
+
+      async function submitNewAdmin() {
+        const name = document.getElementById("newAdminName").value.trim();
+        const username = document
+          .getElementById("newAdminUsername")
+          .value.trim();
+        const email = document.getElementById("newAdminEmail").value.trim();
+        const password = document.getElementById("newAdminPassword").value;
+        const role = document.getElementById("newAdminRole").value;
+        const commune = document.getElementById("newAdminCommune").value.trim();
+
+        if (!name || !username || !email || !password) {
+          showToast("Remplissez tous les champs obligatoires", "warning");
+          return;
+        }
+
+        try {
+          const res = await apiFetch("/api/admin/create-user", {
+            method: "POST",
+            body: JSON.stringify({
+              full_name: name,
+              username,
+              email,
+              password,
+              role,
+              commune,
+            }),
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            showToast("Compte créé avec succès !", "success");
+            document.getElementById("addAdminModal").classList.remove("open");
+            loadAdmins();
+          } else {
+            showToast(data.error || "Échec de la création", "error");
+          }
+        } catch {
+          showToast("Erreur réseau", "error");
+        }
+      }
+
+      // ─────────────────────────────────────────────────────────────────
+      // PROMOTE USER
+      // ─────────────────────────────────────────────────────────────────
+      let pendingPromoteUserId = null;
+
+      function openPromoteModal(id, name) {
+        pendingPromoteUserId = id;
+        document.getElementById("promoteUserName").textContent = name;
+        document.getElementById("promoteModal").classList.add("open");
+      }
+
+      async function confirmPromote(role) {
+        if (!pendingPromoteUserId) return;
+        try {
+          const res = await apiFetch(`/api/users/${pendingPromoteUserId}`, {
+            method: "PUT",
+            body: JSON.stringify({ role }),
+          });
+          document.getElementById("promoteModal").classList.remove("open");
+          if (res.ok) {
+            showToast(`Rôle mis à jour : ${role}`, "success");
+            loadUsers();
+            loadAdmins();
+          } else {
+            const d = await res.json();
+            showToast(d.error || "Échec de la promotion", "error");
+          }
+        } catch {
+          showToast("Erreur réseau", "error");
+        }
+        pendingPromoteUserId = null;
+      }
+
+      // ─────────────────────────────────────────────────────────────────
+      // ALERTS
+      // ─────────────────────────────────────────────────────────────────
+      async function loadAlerts() {
+        document.getElementById("alertsTableBody").innerHTML =
+          `<tr><td colspan="7"><div class="loading"><div class="spinner"></div> Chargement…</div></td></tr>`;
+        try {
+          const res = await apiFetch("/api/alerts?active_only=true&limit=200");
+          const data = await res.json();
+          const alerts = data.alerts || [];
+
+          document.getElementById("sidebarBadgeAlerts").textContent =
+            alerts.filter((a) => a.status === "active").length;
+
+          if (!alerts.length) {
+            document.getElementById("alertsTableBody").innerHTML =
+              `<tr><td colspan="7"><div class="empty-state"><div class="icon">✅</div><h3>Aucune alerte active</h3><p>La plateforme est saine !</p></div></td></tr>`;
+            return;
+          }
+
+          const prioColors = {
+            1: "badge-blue",
+            2: "badge-amber",
+            3: "badge-red",
+          };
+          document.getElementById("alertsTableBody").innerHTML = alerts
+            .map(
+              (a) => `
+          <tr>
+            <td style="font-weight:600;color:var(--t1)">${a.disease_name || "—"}</td>
+            <td style="color:var(--t3)">${a.commune || "—"}</td>
+            <td>${severityBadge(a.severity)}</td>
+            <td><span class="badge ${prioColors[a.priority] || "badge-blue"}">P${a.priority || 1}</span></td>
+            <td style="color:var(--t3);font-size:12px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.message || "—"}</td>
+            <td style="color:var(--tm);font-size:12px">${fmtDate(a.created_at)}</td>
+            <td><button class="btn btn-primary btn-sm" onclick="resolveAlert(${a.id})">✓ Résoudre</button></td>
+          </tr>
+        `,
+            )
+            .join("");
+        } catch {
+          showToast("Erreur chargement alertes", "error");
+        }
+      }
+
+      async function resolveAlert(id) {
+        try {
+          const res = await apiFetch(`/api/alerts/${id}/resolve`, {
+            method: "POST",
+            body: JSON.stringify({ note: "Résolu par admin" }),
+          });
+          if (res.ok) {
+            showToast("Alerte résolue", "success");
+            loadAlerts();
+          } else showToast("Échec", "error");
+        } catch {
+          showToast("Erreur réseau", "error");
+        }
+      }
+
+      // ─────────────────────────────────────────────────────────────────
+      // STATS
+      // ─────────────────────────────────────────────────────────────────
+      async function loadStats() {
+        document.getElementById("statsContent").innerHTML =
+          `<div class="loading"><div class="spinner"></div> Chargement…</div>`;
+        try {
+          const res = await apiFetch("/api/statistics");
+          const s = await res.json();
+
+          document.getElementById("statsContent").innerHTML = `
+          <div class="stats-row">
+            <div class="stat-card"><div class="stat-icon" style="background:rgba(74,222,128,0.1)">📊</div><div class="stat-num" style="color:var(--green)">${s.total_analyses ?? 0}</div><div class="stat-lbl">Total analyses</div></div>
+            <div class="stat-card"><div class="stat-icon" style="background:rgba(96,165,250,0.1)">👥</div><div class="stat-num" style="color:var(--blue)">${s.total_users ?? 0}</div><div class="stat-lbl">Utilisateurs actifs</div></div>
+            <div class="stat-card"><div class="stat-icon" style="background:rgba(251,191,36,0.1)">🌿</div><div class="stat-num" style="color:var(--amber)">${s.unique_diseases ?? 0}</div><div class="stat-lbl">Maladies uniques</div></div>
+            <div class="stat-card"><div class="stat-icon" style="background:rgba(248,113,113,0.1)">🚨</div><div class="stat-num" style="color:var(--red)">${s.active_alerts ?? 0}</div><div class="stat-lbl">Alertes actives</div></div>
+            <div class="stat-card"><div class="stat-icon" style="background:rgba(45,212,191,0.1)">✅</div><div class="stat-num" style="color:var(--teal)">${s.healthy_analyses ?? 0}</div><div class="stat-lbl">Plantes saines</div></div>
+            <div class="stat-card"><div class="stat-icon" style="background:rgba(192,132,252,0.1)">💾</div><div class="stat-num" style="color:var(--purple)">${s.storage_used_mb?.toFixed(1) ?? "0"}Mo</div><div class="stat-lbl">Stockage utilisé</div></div>
+          </div>
+          ${
+            s.users_by_role
+              ? `
+          <div class="glass-card" style="margin-top:20px">
+            <h3 style="font-size:16px;font-weight:700;margin-bottom:18px">Répartition par rôle</h3>
+            <div style="display:flex;flex-wrap:wrap;gap:12px">
+              ${Object.entries(s.users_by_role)
+                .map(
+                  ([r, n]) => `
+                <div class="stat-card" style="flex:1;min-width:140px">
+                  <div style="font-size:24px;font-weight:800;font-family:'Syne',sans-serif">${n}</div>
+                  <div style="font-size:12px;margin-top:4px">${roleBadge(r)}</div>
+                </div>
+              `,
+                )
+                .join("")}
+            </div>
+          </div>`
+              : ""
+          }
+          ${
+            s.top_diseases?.length
+              ? `
+          <div class="glass-card" style="margin-top:20px">
+            <h3 style="font-size:16px;font-weight:700;margin-bottom:18px">Top maladies détectées</h3>
+            <div class="table-wrap"><table>
+              <thead><tr><th>Maladie</th><th>Occurrences</th><th>Sévérité</th></tr></thead>
+              <tbody>${s.top_diseases
+                .map(
+                  (d) => `<tr>
+                <td style="font-weight:600;color:var(--t1)">${d.disease_name || "—"}</td>
+                <td><span style="font-weight:700;color:var(--green)">${d.count}</span></td>
+                <td>${severityBadge(d.severity)}</td>
+              </tr>`,
+                )
+                .join("")}</tbody>
+            </table></div>
+          </div>`
+              : ""
+          }
+        `;
+        } catch {
+          showToast("Erreur stats", "error");
+        }
+      }
+
+      // ─────────────────────────────────────────────────────────────────
+      // GLOBAL SEARCH
+      // ─────────────────────────────────────────────────────────────────
+      function handleGlobalSearch(v) {
+        if (currentPage === "analyses") {
+          document.getElementById("analysesSearch").value = v;
+          filterAnalyses();
+        } else if (currentPage === "users") {
+          document.getElementById("usersSearch").value = v;
+          filterUsers();
+        }
+      }
+
+      // ─────────────────────────────────────────────────────────────────
+      // IMAGE MODAL
+      // ─────────────────────────────────────────────────────────────────
+      function openImgModal(url, caption) {
+        document.getElementById("imgModalSrc").src = url;
+        document.getElementById("imgModalCaption").textContent = caption || "";
+        document.getElementById("imgModal").classList.add("open");
+      }
+      function closeImgModal(e) {
+        if (e.target === document.getElementById("imgModal"))
+          document.getElementById("imgModal").classList.remove("open");
+      }
+      function closeModalIfOverlay(e, id) {
+        if (e.target === document.getElementById(id))
+          document.getElementById(id).classList.remove("open");
+      }
+
+      // ─────────────────────────────────────────────────────────────────
+      // EXPORT CSV
+      // ─────────────────────────────────────────────────────────────────
+      async function exportCSV() {
+        try {
+          const res = await apiFetch("/api/export/csv");
+          if (!res.ok) {
+            showToast("Erreur export", "error");
+            return;
+          }
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "phytosentinel_export.csv";
+          a.click();
+          URL.revokeObjectURL(url);
+          showToast("Export CSV lancé", "success");
+        } catch {
+          showToast("Erreur réseau", "error");
+        }
+      }
+
+      // ─────────────────────────────────────────────────────────────────
+      // INIT
+      // ─────────────────────────────────────────────────────────────────
+      window.addEventListener("DOMContentLoaded", async () => {
+        await checkAuth();
+        navigate("dashboard");
+      });
+
+      // keyboard shortcut: Escape closes any open modal
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          document
+            .querySelectorAll(".modal-overlay.open")
+            .forEach((m) => m.classList.remove("open"));
+        }
+      });
+    </script>
+  </body>
+</html>
