@@ -186,8 +186,12 @@ Each model is a DenseNet classifier trained on PlantVillage classes for one crop
 
 ## 📄 License
 
-Add your license here (for example MIT), or remove this section.
+This project was developed as an academic internship project. All rights reserved © 2025/2026.
 
 ## 👤 Author
 
 **wissal-kht** — [github.com/wissal-kht](https://github.com/wissal-kht)
+**Laritnour** _ [github.com/Laritnour](https://github.com/Laritnour)
+**douaakriba** _ [github.com/douaakriba](https://github.com/douaakriba)
+
+
