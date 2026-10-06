@@ -163,7 +163,7 @@ Admin-only routes manage users (`/api/users`, `/api/admin/create-user`) and shar
 
 ---
 
-## 🤖 About the models
+##  About the models
 
 Each model is a DenseNet classifier trained on PlantVillage classes for one crop. Images are resized to 256×256 and passed to the model as raw pixel values (0–255): the models already contain their own rescaling layer, so **do not divide by 255** when preprocessing.
 
@@ -176,7 +176,7 @@ Each model is a DenseNet classifier trained on PlantVillage classes for one crop
 
 ---
 
-## 🗺️ Roadmap
+##  Roadmap
 
 - [ ] Backend support for the farming calendar (currently stored in the browser only)
 - [ ] Disease catalogue served from the database instead of the HTML page
@@ -184,14 +184,14 @@ Each model is a DenseNet classifier trained on PlantVillage classes for one crop
 
 ---
 
-## 📄 License
+##  License
 
 This project was developed as an academic internship project. All rights reserved © 2025/2026.
 
 ## 👤 Author
 
--**wissal-kht** — [github.com/wissal-kht](https://github.com/wissal-kht)
--**Laritnour** _ [github.com/Laritnour](https://github.com/Laritnour)
--**douaakriba** _ [github.com/douaakriba](https://github.com/douaakriba)
+- **wissal-kht** — [github.com/wissal-kht](https://github.com/wissal-kht)
+- **Laritnour** _ [github.com/Laritnour](https://github.com/Laritnour)
+- **douaakriba** _ [github.com/douaakriba](https://github.com/douaakriba)
 
 
