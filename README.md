@@ -190,8 +190,8 @@ This project was developed as an academic internship project. All rights reserve
 
 ## 👤 Author
 
-**wissal-kht** — [github.com/wissal-kht](https://github.com/wissal-kht)
-**Laritnour** _ [github.com/Laritnour](https://github.com/Laritnour)
-**douaakriba** _ [github.com/douaakriba](https://github.com/douaakriba)
+-**wissal-kht** — [github.com/wissal-kht](https://github.com/wissal-kht)
+-**Laritnour** _ [github.com/Laritnour](https://github.com/Laritnour)
+-**douaakriba** _ [github.com/douaakriba](https://github.com/douaakriba)
 
 
